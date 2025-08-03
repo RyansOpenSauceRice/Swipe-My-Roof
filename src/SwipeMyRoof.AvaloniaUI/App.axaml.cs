@@ -56,11 +56,15 @@ public partial class App : Application
         services.AddSingleton<IStorageService, FileStorageService>();
         services.AddSingleton<IOsmAuthService, OsmAuthService>();
         services.AddSingleton<IOsmService, OsmService>();
+        services.AddSingleton<ITileProviderService, TileProviderService>();
+        services.AddSingleton<IImageService, BingImageService>(sp => 
+            new BingImageService(sp.GetRequiredService<HttpClient>(), "YOUR_BING_MAPS_KEY"));
         
         // Register view models
         services.AddTransient<MainWindowViewModel>();
         services.AddTransient<OsmAuthViewModel>();
         services.AddTransient<BuildingValidationViewModel>();
+        services.AddTransient<TileProviderViewModel>();
     }
 
     private void DisableAvaloniaDataAnnotationValidation()

@@ -1,0 +1,243 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:SwipeMyRoof.UI.ViewModels"
+             xmlns:models="using:SwipeMyRoof.Images.Models"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SwipeMyRoof.AvaloniaUI.Views.TileProviderView"
+             x:DataType="vm:TileProviderViewModel">
+
+  <Design.DataContext>
+    <vm:TileProviderViewModel />
+  </Design.DataContext>
+
+  <Grid RowDefinitions="Auto,*,Auto" Margin="20">
+    <TextBlock Grid.Row="0" 
+               Text="Satellite Imagery Providers" 
+               FontSize="20" 
+               FontWeight="Bold" 
+               HorizontalAlignment="Center"
+               Margin="0,0,0,20" />
+    
+    <Grid Grid.Row="1" ColumnDefinitions="*,Auto,*" IsVisible="{Binding !IsAddingProvider, !IsEditingProvider}">
+      <!-- Provider List -->
+      <Border Grid.Column="0" 
+              BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
+              BorderThickness="1" 
+              CornerRadius="4"
+              Padding="10">
+        <Grid RowDefinitions="Auto,*">
+          <TextBlock Grid.Row="0" 
+                     Text="Available Providers" 
+                     FontWeight="SemiBold" 
+                     Margin="0,0,0,10" />
+          
+          <ListBox Grid.Row="1" 
+                   ItemsSource="{Binding Providers}" 
+                   SelectedItem="{Binding SelectedProvider}"
+                   Background="Transparent">
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="models:TileProvider">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Grid.Column="0" 
+                             Text="{Binding Name}" 
+                             VerticalAlignment="Center" />
+                  
+                  <StackPanel Grid.Column="1" 
+                              Orientation="Horizontal" 
+                              Spacing="5">
+                    <Button Content="Edit" 
+                            Command="{Binding $parent[UserControl].DataContext.EditProviderCommand}" 
+                            CommandParameter="{Binding}" />
+                    
+                    <Button Content="Remove" 
+                            Command="{Binding $parent[UserControl].DataContext.RemoveProviderCommand}" 
+                            CommandParameter="{Binding}"
+                            IsEnabled="{Binding IsUserDefined}" />
+                  </StackPanel>
+                </Grid>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </Grid>
+      </Border>
+      
+      <!-- Spacer -->
+      <GridSplitter Grid.Column="1" Width="20" Background="Transparent" />
+      
+      <!-- Provider Details -->
+      <Border Grid.Column="2" 
+              BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
+              BorderThickness="1" 
+              CornerRadius="4"
+              Padding="10">
+        <Grid RowDefinitions="Auto,*,Auto">
+          <TextBlock Grid.Row="0" 
+                     Text="Provider Details" 
+                     FontWeight="SemiBold" 
+                     Margin="0,0,0,10" />
+          
+          <ScrollViewer Grid.Row="1">
+            <StackPanel Spacing="10" IsEnabled="{Binding SelectedProvider, Converter={x:Static ObjectConverters.IsNotNull}}">
+              <TextBlock Text="{Binding SelectedProvider.Name, StringFormat='Name: {0}'}" />
+              <TextBlock Text="{Binding SelectedProvider.Type, StringFormat='Type: {0}'}" />
+              <TextBlock Text="{Binding SelectedProvider.UrlTemplate, StringFormat='URL Template: {0}'}" TextWrapping="Wrap" />
+              <TextBlock Text="{Binding SelectedProvider.Attribution, StringFormat='Attribution: {0}'}" TextWrapping="Wrap" />
+              <TextBlock Text="{Binding SelectedProvider.MinZoom, StringFormat='Min Zoom: {0}'}" />
+              <TextBlock Text="{Binding SelectedProvider.MaxZoom, StringFormat='Max Zoom: {0}'}" />
+              <TextBlock Text="{Binding SelectedProvider.CacheDays, StringFormat='Cache Days: {0}'}" />
+              <TextBlock Text="{Binding SelectedProvider.IsUserDefined, StringFormat='User Defined: {0}'}" />
+            </StackPanel>
+          </ScrollViewer>
+          
+          <Button Grid.Row="2" 
+                  Content="Select Provider" 
+                  Command="{Binding SelectProviderCommand}" 
+                  CommandParameter="{Binding SelectedProvider}"
+                  HorizontalAlignment="Center"
+                  Margin="0,10,0,0"
+                  IsEnabled="{Binding SelectedProvider, Converter={x:Static ObjectConverters.IsNotNull}}" />
+        </Grid>
+      </Border>
+    </Grid>
+    
+    <!-- Add/Edit Provider Form -->
+    <Border Grid.Row="1" 
+            BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
+            BorderThickness="1" 
+            CornerRadius="4"
+            Padding="10"
+            IsVisible="{Binding IsAddingProvider, IsEditingProvider}">
+      <Grid RowDefinitions="Auto,*,Auto">
+        <TextBlock Grid.Row="0" 
+                   Text="{Binding IsAddingProvider, Converter={x:Static BoolConverters.ToString}, ConverterParameter='Add New Provider,Edit Provider'}" 
+                   FontWeight="SemiBold" 
+                   Margin="0,0,0,10" />
+        
+        <ScrollViewer Grid.Row="1">
+          <StackPanel Spacing="10">
+            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+              <!-- Name -->
+              <TextBlock Grid.Row="0" Grid.Column="0" 
+                         Text="Name:" 
+                         VerticalAlignment="Center"
+                         Margin="0,0,10,0" />
+              <TextBox Grid.Row="0" Grid.Column="1" 
+                       Text="{Binding NewProvider.Name}" 
+                       Watermark="Provider Name" />
+              
+              <!-- Type -->
+              <TextBlock Grid.Row="1" Grid.Column="0" 
+                         Text="Type:" 
+                         VerticalAlignment="Center"
+                         Margin="0,0,10,0" />
+              <ComboBox Grid.Row="1" Grid.Column="1" 
+                        ItemsSource="{Binding ProviderTypes}" 
+                        SelectedItem="{Binding NewProvider.Type}"
+                        HorizontalAlignment="Stretch" />
+              
+              <!-- URL Template -->
+              <TextBlock Grid.Row="2" Grid.Column="0" 
+                         Text="URL Template:" 
+                         VerticalAlignment="Center"
+                         Margin="0,0,10,0" />
+              <TextBox Grid.Row="2" Grid.Column="1" 
+                       Text="{Binding NewProvider.UrlTemplate}" 
+                       Watermark="URL Template" />
+              
+              <!-- API Key -->
+              <TextBlock Grid.Row="3" Grid.Column="0" 
+                         Text="API Key:" 
+                         VerticalAlignment="Center"
+                         Margin="0,0,10,0" />
+              <TextBox Grid.Row="3" Grid.Column="1" 
+                       Text="{Binding NewProvider.ApiKey}" 
+                       Watermark="API Key (if required)" />
+              
+              <!-- Attribution -->
+              <TextBlock Grid.Row="4" Grid.Column="0" 
+                         Text="Attribution:" 
+                         VerticalAlignment="Center"
+                         Margin="0,0,10,0" />
+              <TextBox Grid.Row="4" Grid.Column="1" 
+                       Text="{Binding NewProvider.Attribution}" 
+                       Watermark="Attribution Text" />
+              
+              <!-- Attribution URL -->
+              <TextBlock Grid.Row="5" Grid.Column="0" 
+                         Text="Attribution URL:" 
+                         VerticalAlignment="Center"
+                         Margin="0,0,10,0" />
+              <TextBox Grid.Row="5" Grid.Column="1" 
+                       Text="{Binding NewProvider.AttributionUrl}" 
+                       Watermark="Attribution URL" />
+              
+              <!-- Min Zoom -->
+              <TextBlock Grid.Row="6" Grid.Column="0" 
+                         Text="Min Zoom:" 
+                         VerticalAlignment="Center"
+                         Margin="0,0,10,0" />
+              <NumericUpDown Grid.Row="6" Grid.Column="1" 
+                             Value="{Binding NewProvider.MinZoom}"
+                             Minimum="1"
+                             Maximum="25" />
+              
+              <!-- Max Zoom -->
+              <TextBlock Grid.Row="7" Grid.Column="0" 
+                         Text="Max Zoom:" 
+                         VerticalAlignment="Center"
+                         Margin="0,0,10,0" />
+              <NumericUpDown Grid.Row="7" Grid.Column="1" 
+                             Value="{Binding NewProvider.MaxZoom}"
+                             Minimum="1"
+                             Maximum="25" />
+              
+              <!-- Cache Days -->
+              <TextBlock Grid.Row="8" Grid.Column="0" 
+                         Text="Cache Days:" 
+                         VerticalAlignment="Center"
+                         Margin="0,0,10,0" />
+              <NumericUpDown Grid.Row="8" Grid.Column="1" 
+                             Value="{Binding NewProvider.CacheDays}"
+                             Minimum="1"
+                             Maximum="365" />
+              
+              <!-- Help Text -->
+              <TextBlock Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2" 
+                         Text="URL Template Placeholders: {x}, {y}, {z} for tile coordinates, {apikey} for API key, {quadkey} for Bing Maps" 
+                         TextWrapping="Wrap"
+                         Opacity="0.7"
+                         Margin="0,10,0,0" />
+            </Grid>
+          </StackPanel>
+        </ScrollViewer>
+        
+        <StackPanel Grid.Row="2" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Center"
+                    Spacing="10"
+                    Margin="0,10,0,0">
+          <Button Content="Save" 
+                  Command="{Binding SaveProviderCommand}" />
+          
+          <Button Content="Cancel" 
+                  Command="{Binding CancelEditCommand}" />
+        </StackPanel>
+      </Grid>
+    </Border>
+    
+    <StackPanel Grid.Row="2" 
+                Orientation="Horizontal" 
+                HorizontalAlignment="Center"
+                Spacing="10"
+                Margin="0,20,0,0">
+      <Button Content="Add Provider" 
+              Command="{Binding AddProviderCommand}"
+              IsVisible="{Binding !IsAddingProvider, !IsEditingProvider}" />
+      
+      <Button Content="Back" 
+              HorizontalAlignment="Center" />
+    </StackPanel>
+  </Grid>
+</UserControl>
