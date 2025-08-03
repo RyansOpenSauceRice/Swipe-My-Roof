@@ -12,7 +12,7 @@ This document outlines the requirements and best practices for making the Roof C
 - **Summary:** Help map roof colors in OpenStreetMap with a swipe interface
 - **Description:** A privacy-respecting app that helps users contribute roof color data to OpenStreetMap using a simple swipe interface. Uses AI to suggest colors based on satellite imagery, but all decisions are user-confirmed.
 - **Categories:** Navigation, Science & Education
-- **License:** [Specify open source license, e.g., GPL-3.0, MIT]
+- **License:** AGPL-3.0
 - **Web Site:** [Project website URL]
 - **Source Code:** [GitHub repository URL]
 - **Issue Tracker:** [GitHub issues URL]
@@ -24,6 +24,8 @@ This document outlines the requirements and best practices for making the Roof C
 - Reproducible builds
 - No tracking or analytics libraries
 - All network connections must be documented and justified
+- **Database**: SQLite (public domain, fully open source)
+- **Local storage only**: No external database connections
 
 ---
 

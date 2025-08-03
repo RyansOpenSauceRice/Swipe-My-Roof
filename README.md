@@ -104,4 +104,10 @@ For more information about how to use the application:
 
 ## License
 
-This project is open source under the [MIT License](LICENSE).
+This project is open source under the [GNU Affero General Public License v3.0 (AGPL-3.0)](LICENSE).
+
+The AGPL-3.0 license ensures that:
+- The source code remains free and open
+- Any modifications or derivative works must also be open source
+- Network services using this code must provide source code to users
+- This protects the OpenStreetMap community's interests in keeping mapping tools open

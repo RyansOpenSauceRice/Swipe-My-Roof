@@ -61,7 +61,7 @@
                     <TextBlock Text="A tool for OpenStreetMap volunteers to validate building information." TextWrapping="Wrap" Margin="0 0 0 10"/>
                     <TextBlock Text="Version 1.0.0" Margin="0 0 0 10"/>
                     <TextBlock Text="© 2025 Swipe My Roof Contributors" Margin="0 0 0 10"/>
-                    <TextBlock Text="Licensed under the MIT License" Margin="0 0 0 10"/>
+                    <TextBlock Text="Licensed under the AGPL-3.0 License" Margin="0 0 0 10"/>
                 </StackPanel>
             </TabItem>
         </TabControl>
