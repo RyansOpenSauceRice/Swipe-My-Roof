@@ -24,7 +24,7 @@ public interface ILlmService
     Task<RoofColorResponse> GetRoofColorReSuggestionAsync(RoofColorReSuggestionRequest request, CancellationToken cancellationToken = default);
     
     /// <summary>
-    /// Get the estimated token usage for a request
+    /// Get the estimated token usage for a color request
     /// </summary>
     /// <param name="request">The roof color request</param>
     /// <returns>Estimated token usage</returns>

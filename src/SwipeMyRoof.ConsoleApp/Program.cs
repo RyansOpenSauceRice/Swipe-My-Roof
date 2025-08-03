@@ -11,6 +11,9 @@ using SwipeMyRoof.Settings.Models;
 using SwipeMyRoof.Settings.Services;
 using SwipeMyRoof.Storage.Models;
 using SwipeMyRoof.Storage.Services;
+using SwipeMyRoof.UI.Controls;
+using SwipeMyRoof.UI.ViewModels;
+using SwipeMyRoof.ConsoleApp;
 
 // Setup dependency injection
 var serviceProvider = new ServiceCollection()
@@ -55,7 +58,8 @@ while (!exit)
     Console.WriteLine("2. Start Real Session");
     Console.WriteLine("3. View Upload Queue");
     Console.WriteLine("4. Settings");
-    Console.WriteLine("5. Exit");
+    Console.WriteLine("5. Run Confidence Indicator Demo");
+    Console.WriteLine("6. Exit");
     Console.Write("Select an option: ");
     
     var option = Console.ReadLine();
@@ -76,6 +80,9 @@ while (!exit)
             await ManageSettingsAsync();
             break;
         case "5":
+            ConfidenceDemo.Run();
+            break;
+        case "6":
             exit = true;
             break;
         default:
