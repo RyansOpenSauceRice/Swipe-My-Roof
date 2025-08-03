@@ -20,6 +20,7 @@ public class ColorPickerViewModel : ViewModelBase
     private bool _isPickingColor;
     private string _instructions = "Click on the roof to select its color";
     private bool _showColorPreview;
+    private string _manualHexInput = string.Empty;
     
     /// <summary>
     /// Constructor
@@ -32,6 +33,7 @@ public class ColorPickerViewModel : ViewModelBase
         // Commands
         PickColorCommand = ReactiveCommand.CreateFromTask<(int x, int y)>(PickColorAsync);
         ConfirmColorCommand = ReactiveCommand.Create(ConfirmColor, this.WhenAnyValue(x => x.SelectedColor).Select(c => c != null));
+        ApplyManualColorCommand = ReactiveCommand.Create(ApplyManualColor, this.WhenAnyValue(x => x.ManualHexInput).Select(hex => ColorUtils.IsValidHexColor(hex)));
         CancelCommand = ReactiveCommand.Create(Cancel);
         StartPickingCommand = ReactiveCommand.Create(StartPicking);
     }
@@ -91,19 +93,28 @@ public class ColorPickerViewModel : ViewModelBase
     /// <summary>
     /// Selected color hex string
     /// </summary>
-    public string SelectedColorHex => SelectedColor?.Rgb.ToHex() ?? "#000000";
+    public string SelectedColorHex => SelectedColor?.HexColor ?? "#000000";
     
     /// <summary>
-    /// Selected standard color name
+    /// Selected color description
     /// </summary>
-    public string SelectedStandardColor => SelectedColor?.StandardColor ?? "none";
+    public string SelectedColorDescription => SelectedColor?.ColorName ?? "none";
     
     /// <summary>
-    /// Mapping confidence percentage
+    /// RGB values text
     /// </summary>
-    public string MappingConfidenceText => SelectedColor != null 
-        ? $"{SelectedColor.MappingConfidence:P0} confidence"
+    public string RgbValuesText => SelectedColor != null 
+        ? $"R:{SelectedColor.Rgb.R} G:{SelectedColor.Rgb.G} B:{SelectedColor.Rgb.B}"
         : "";
+    
+    /// <summary>
+    /// Manual HEX color input
+    /// </summary>
+    public string ManualHexInput
+    {
+        get => _manualHexInput;
+        set => this.RaiseAndSetIfChanged(ref _manualHexInput, value);
+    }
     
     /// <summary>
     /// Command to pick a color at coordinates
@@ -114,6 +125,11 @@ public class ColorPickerViewModel : ViewModelBase
     /// Command to confirm the selected color
     /// </summary>
     public ReactiveCommand<Unit, Unit> ConfirmColorCommand { get; }
+    
+    /// <summary>
+    /// Command to apply manual HEX color
+    /// </summary>
+    public ReactiveCommand<Unit, Unit> ApplyManualColorCommand { get; }
     
     /// <summary>
     /// Command to cancel color picking
@@ -164,13 +180,13 @@ public class ColorPickerViewModel : ViewModelBase
             {
                 SelectedColor = pickedColor;
                 ShowColorPreview = true;
-                Instructions = $"Selected: {pickedColor.StandardColor} ({pickedColor.Rgb.ToHex()})";
+                Instructions = $"Selected: {pickedColor.ColorName} ({pickedColor.HexColor})";
                 
                 // Raise property changed for computed properties
                 this.RaisePropertyChanged(nameof(SelectedColorBrush));
                 this.RaisePropertyChanged(nameof(SelectedColorHex));
-                this.RaisePropertyChanged(nameof(SelectedStandardColor));
-                this.RaisePropertyChanged(nameof(MappingConfidenceText));
+                this.RaisePropertyChanged(nameof(SelectedColorDescription));
+                this.RaisePropertyChanged(nameof(RgbValuesText));
             }
             else
             {
@@ -191,7 +207,8 @@ public class ColorPickerViewModel : ViewModelBase
         var args = new ColorConfirmedEventArgs
         {
             PickedColor = SelectedColor,
-            StandardColor = SelectedColor.StandardColor
+            HexColor = SelectedColor.HexColor,
+            ColorDescription = SelectedColor.ColorName ?? "Unknown"
         };
         
         ColorConfirmed?.Invoke(this, args);
@@ -200,6 +217,40 @@ public class ColorPickerViewModel : ViewModelBase
         IsPickingColor = false;
         ShowColorPreview = false;
         Instructions = "Color confirmed!";
+    }
+    
+    /// <summary>
+    /// Apply manually entered HEX color
+    /// </summary>
+    private void ApplyManualColor()
+    {
+        if (!ColorUtils.IsValidHexColor(ManualHexInput))
+            return;
+        
+        // Parse HEX to RGB
+        var hex = ManualHexInput.TrimStart('#');
+        var r = Convert.ToByte(hex.Substring(0, 2), 16);
+        var g = Convert.ToByte(hex.Substring(2, 2), 16);
+        var b = Convert.ToByte(hex.Substring(4, 2), 16);
+        
+        var rgb = new RgbColor { R = r, G = g, B = b, A = 255 };
+        var pickedColor = new PickedColor
+        {
+            Rgb = rgb,
+            PixelX = -1, // Manual entry
+            PixelY = -1, // Manual entry
+            ColorName = ColorUtils.GetColorDescription(rgb)
+        };
+        
+        SelectedColor = pickedColor;
+        ShowColorPreview = true;
+        Instructions = $"Manual entry: {pickedColor.ColorName} ({pickedColor.HexColor})";
+        
+        // Raise property changed for computed properties
+        this.RaisePropertyChanged(nameof(SelectedColorBrush));
+        this.RaisePropertyChanged(nameof(SelectedColorHex));
+        this.RaisePropertyChanged(nameof(SelectedColorDescription));
+        this.RaisePropertyChanged(nameof(RgbValuesText));
     }
     
     private void Cancel()
@@ -227,5 +278,6 @@ public class ColorPickerViewModel : ViewModelBase
 public class ColorConfirmedEventArgs : EventArgs
 {
     public PickedColor PickedColor { get; set; } = null!;
-    public string StandardColor { get; set; } = string.Empty;
+    public string HexColor { get; set; } = string.Empty;
+    public string ColorDescription { get; set; } = string.Empty;
 }

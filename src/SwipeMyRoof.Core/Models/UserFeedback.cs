@@ -16,9 +16,9 @@ public class UserFeedback
     public UserAction Action { get; set; }
     
     /// <summary>
-    /// Final color value (if accepted or manually corrected)
+    /// Final color value as HEX (if accepted or manually corrected)
     /// </summary>
-    public string? FinalColor { get; set; }
+    public string? FinalHexColor { get; set; }
     
     /// <summary>
     /// Whether the color was manually selected
@@ -36,9 +36,9 @@ public class UserFeedback
     public (int x, int y)? PickedPixelCoordinates { get; set; }
     
     /// <summary>
-    /// Confidence of the color mapping (if manually selected)
+    /// Color description (if manually selected)
     /// </summary>
-    public double? MappingConfidence { get; set; }
+    public string? ColorDescription { get; set; }
     
     /// <summary>
     /// Timestamp when feedback was provided

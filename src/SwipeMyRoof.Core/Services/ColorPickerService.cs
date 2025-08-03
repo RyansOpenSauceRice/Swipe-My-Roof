@@ -30,15 +30,12 @@ public class ColorPickerService : IColorPickerService
                 A = pixel.A
             };
             
-            var (standardColor, confidence) = RoofColorPalette.MapToStandardColor(rgb);
-            
             return new PickedColor
             {
                 Rgb = rgb,
-                StandardColor = standardColor,
-                MappingConfidence = confidence,
                 PixelX = x,
-                PixelY = y
+                PixelY = y,
+                ColorName = ColorUtils.GetColorDescription(rgb)
             };
         }
         catch (Exception ex)
@@ -95,15 +92,12 @@ public class ColorPickerService : IColorPickerService
                 A = avgA
             };
             
-            var (standardColor, confidence) = RoofColorPalette.MapToStandardColor(rgb);
-            
             return new PickedColor
             {
                 Rgb = rgb,
-                StandardColor = standardColor,
-                MappingConfidence = confidence,
                 PixelX = x,
-                PixelY = y
+                PixelY = y,
+                ColorName = ColorUtils.GetColorDescription(rgb)
             };
         }
         catch (Exception ex)
@@ -163,8 +157,8 @@ public class ColorPickerService : IColorPickerService
     }
     
     /// <inheritdoc />
-    public (string colorName, double confidence) MapToStandardColor(RgbColor rgb)
+    public string GetColorDescription(RgbColor rgb)
     {
-        return RoofColorPalette.MapToStandardColor(rgb);
+        return ColorUtils.GetColorDescription(rgb);
     }
 }

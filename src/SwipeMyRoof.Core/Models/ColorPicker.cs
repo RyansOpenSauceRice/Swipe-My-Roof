@@ -11,14 +11,9 @@ public class PickedColor
     public RgbColor Rgb { get; set; } = new();
     
     /// <summary>
-    /// Closest standard palette color
+    /// HEX color value (e.g., "#FF5733")
     /// </summary>
-    public string StandardColor { get; set; } = string.Empty;
-    
-    /// <summary>
-    /// Confidence of the palette mapping (0.0-1.0)
-    /// </summary>
-    public double MappingConfidence { get; set; }
+    public string HexColor => Rgb.ToHex();
     
     /// <summary>
     /// X coordinate where color was picked
@@ -34,6 +29,11 @@ public class PickedColor
     /// Timestamp when color was picked
     /// </summary>
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+    
+    /// <summary>
+    /// Optional color name/description provided by user
+    /// </summary>
+    public string? ColorName { get; set; }
 }
 
 /// <summary>
@@ -92,66 +92,84 @@ public class RgbColor
 }
 
 /// <summary>
-/// Standard roof color palette with RGB mappings
+/// Color utility methods
 /// </summary>
-public static class RoofColorPalette
+public static class ColorUtils
 {
     /// <summary>
-    /// Standard roof colors with their typical RGB values
+    /// Get a human-readable description of a color based on its RGB values
     /// </summary>
-    public static readonly Dictionary<string, RgbColor> StandardColors = new()
+    /// <param name="rgb">RGB color</param>
+    /// <returns>Color description</returns>
+    public static string GetColorDescription(RgbColor rgb)
     {
-        { "black", new RgbColor { R = 30, G = 30, B = 30 } },
-        { "dark gray", new RgbColor { R = 80, G = 80, B = 80 } },
-        { "light gray", new RgbColor { R = 180, G = 180, B = 180 } },
-        { "red", new RgbColor { R = 180, G = 50, B = 50 } },
-        { "brown", new RgbColor { R = 120, G = 80, B = 50 } },
-        { "tan", new RgbColor { R = 210, G = 180, B = 140 } },
-        { "green", new RgbColor { R = 80, G = 120, B = 60 } },
-        { "blue", new RgbColor { R = 60, G = 100, B = 150 } },
-        { "white", new RgbColor { R = 240, G = 240, B = 240 } },
-        { "other", new RgbColor { R = 128, G = 128, B = 128 } }
-    };
-    
-    /// <summary>
-    /// Map an RGB color to the closest standard palette color
-    /// </summary>
-    /// <param name="rgb">RGB color to map</param>
-    /// <returns>Closest standard color name and confidence</returns>
-    public static (string colorName, double confidence) MapToStandardColor(RgbColor rgb)
-    {
-        var minDistance = double.MaxValue;
-        var closestColor = "other";
+        // Calculate brightness
+        var brightness = (rgb.R * 0.299 + rgb.G * 0.587 + rgb.B * 0.114) / 255.0;
         
-        foreach (var (colorName, standardRgb) in StandardColors)
+        // Determine dominant color channel
+        var max = Math.Max(rgb.R, Math.Max(rgb.G, rgb.B));
+        var min = Math.Min(rgb.R, Math.Min(rgb.G, rgb.B));
+        var diff = max - min;
+        
+        // If very low saturation, it's a shade of gray
+        if (diff < 30)
         {
-            var distance = CalculateColorDistance(rgb, standardRgb);
-            if (distance < minDistance)
+            return brightness switch
             {
-                minDistance = distance;
-                closestColor = colorName;
-            }
+                < 0.2 => "Very Dark",
+                < 0.4 => "Dark",
+                < 0.6 => "Medium",
+                < 0.8 => "Light",
+                _ => "Very Light"
+            };
         }
         
-        // Calculate confidence based on distance (closer = higher confidence)
-        // Max distance in RGB space is ~441 (sqrt(255^2 + 255^2 + 255^2))
-        var confidence = Math.Max(0.0, 1.0 - (minDistance / 441.0));
+        // Determine hue-based description
+        string hueDescription;
+        if (rgb.R == max)
+        {
+            if (rgb.G > rgb.B)
+                hueDescription = rgb.G > rgb.R * 0.7 ? "Orange-Red" : "Red";
+            else
+                hueDescription = rgb.B > rgb.R * 0.7 ? "Purple-Red" : "Red";
+        }
+        else if (rgb.G == max)
+        {
+            if (rgb.R > rgb.B)
+                hueDescription = rgb.R > rgb.G * 0.7 ? "Yellow-Green" : "Green";
+            else
+                hueDescription = rgb.B > rgb.G * 0.7 ? "Blue-Green" : "Green";
+        }
+        else // rgb.B == max
+        {
+            if (rgb.R > rgb.G)
+                hueDescription = rgb.R > rgb.B * 0.7 ? "Purple-Blue" : "Blue";
+            else
+                hueDescription = rgb.G > rgb.B * 0.7 ? "Cyan-Blue" : "Blue";
+        }
         
-        return (closestColor, confidence);
+        // Add brightness modifier
+        var brightnessModifier = brightness switch
+        {
+            < 0.3 => "Dark ",
+            > 0.7 => "Light ",
+            _ => ""
+        };
+        
+        return brightnessModifier + hueDescription;
     }
     
     /// <summary>
-    /// Calculate Euclidean distance between two RGB colors
+    /// Validate if a hex color string is valid
     /// </summary>
-    /// <param name="color1">First color</param>
-    /// <param name="color2">Second color</param>
-    /// <returns>Distance value</returns>
-    private static double CalculateColorDistance(RgbColor color1, RgbColor color2)
+    /// <param name="hex">Hex color string</param>
+    /// <returns>True if valid</returns>
+    public static bool IsValidHexColor(string hex)
     {
-        var deltaR = color1.R - color2.R;
-        var deltaG = color1.G - color2.G;
-        var deltaB = color1.B - color2.B;
+        if (string.IsNullOrEmpty(hex))
+            return false;
         
-        return Math.Sqrt(deltaR * deltaR + deltaG * deltaG + deltaB * deltaB);
+        hex = hex.TrimStart('#');
+        return hex.Length == 6 && hex.All(c => char.IsDigit(c) || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f'));
     }
 }

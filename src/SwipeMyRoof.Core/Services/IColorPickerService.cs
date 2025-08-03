@@ -35,9 +35,9 @@ public interface IColorPickerService
     Task<List<RgbColor>> GetDominantColorsAsync(byte[] imageData, int maxColors = 5);
     
     /// <summary>
-    /// Map an RGB color to the standard roof color palette
+    /// Get a human-readable description of an RGB color
     /// </summary>
-    /// <param name="rgb">RGB color to map</param>
-    /// <returns>Standard color name and confidence</returns>
-    (string colorName, double confidence) MapToStandardColor(RgbColor rgb);
+    /// <param name="rgb">RGB color to describe</param>
+    /// <returns>Color description</returns>
+    string GetColorDescription(RgbColor rgb);
 }

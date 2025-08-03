@@ -354,23 +354,23 @@ public partial class BuildingValidationViewModel : ViewModelBase
         // Update the building with the manually selected color
         if (CurrentBuilding.ProposedColor != null)
         {
-            CurrentBuilding.ProposedColor.Value = e.StandardColor;
+            CurrentBuilding.ProposedColor.Value = e.HexColor;
             CurrentBuilding.ProposedColor.Source = "manual";
-            CurrentBuilding.ProposedColor.Confidence = e.PickedColor.MappingConfidence;
-            CurrentBuilding.ProposedColor.Explanation = $"Manually selected from satellite imagery at pixel ({e.PickedColor.PixelX}, {e.PickedColor.PixelY})";
+            CurrentBuilding.ProposedColor.Confidence = 1.0; // Manual selection is 100% confident
+            CurrentBuilding.ProposedColor.Explanation = $"Manually selected from satellite imagery at pixel ({e.PickedColor.PixelX}, {e.PickedColor.PixelY}). Color: {e.ColorDescription}";
         }
         
         // Update UI
-        ProposedColorValue = e.StandardColor;
-        ProposedColorExplanation = $"Manually selected: {e.StandardColor} (RGB: {e.PickedColor.Rgb.ToHex()})";
+        ProposedColorValue = e.HexColor;
+        ProposedColorExplanation = $"Manually selected: {e.ColorDescription} ({e.HexColor})";
         
-        // Update confidence indicator
-        ConfidenceIndicator = new ConfidenceIndicator(e.PickedColor.MappingConfidence);
+        // Update confidence indicator (manual selection = 100% confidence)
+        ConfidenceIndicator = new ConfidenceIndicator(1.0);
         
         // Hide color picker
         ShowColorPicker = false;
         
-        Console.WriteLine($"Color manually selected: {e.StandardColor} for building {CurrentBuilding.OsmId}");
+        Console.WriteLine($"Color manually selected: {e.HexColor} ({e.ColorDescription}) for building {CurrentBuilding.OsmId}");
     }
     
     /// <summary>

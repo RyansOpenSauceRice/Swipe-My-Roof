@@ -103,87 +103,55 @@
                             
                             <!-- Color Details -->
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <TextBlock Classes="label" Text="Standard Color:"/>
-                                <TextBlock Text="{Binding SelectedStandardColor}" FontWeight="Bold" Margin="0 0 0 5"/>
+                                <TextBlock Classes="label" Text="HEX Color:"/>
+                                <TextBlock Text="{Binding SelectedColorHex}" FontFamily="Consolas" FontWeight="Bold" Margin="0 0 0 5"/>
                                 
-                                <TextBlock Classes="label" Text="RGB Hex:"/>
-                                <TextBlock Text="{Binding SelectedColorHex}" FontFamily="Consolas" Margin="0 0 0 5"/>
+                                <TextBlock Classes="label" Text="RGB Values:"/>
+                                <TextBlock Text="{Binding RgbValuesText}" FontFamily="Consolas" Margin="0 0 0 5"/>
                                 
-                                <TextBlock Classes="label" Text="Mapping Confidence:"/>
-                                <TextBlock Text="{Binding MappingConfidenceText}" Margin="0 0 0 5"/>
+                                <TextBlock Classes="label" Text="Color Description:"/>
+                                <TextBlock Text="{Binding SelectedColorDescription}" Margin="0 0 0 5"/>
                             </StackPanel>
                         </Grid>
                     </StackPanel>
                 </Border>
                 
-                <!-- Color Palette Reference -->
+                <!-- Manual HEX Input -->
                 <Border Classes="card">
                     <StackPanel>
-                        <TextBlock Classes="h2" Text="Standard Roof Colors"/>
-                        <TextBlock Text="Reference palette for roof color validation" 
+                        <TextBlock Classes="h2" Text="Manual HEX Entry"/>
+                        <TextBlock Text="Enter a HEX color code directly if you know the exact color value." 
                                    FontSize="12" Foreground="#666666" Margin="0 0 0 10"/>
                         
-                        <WrapPanel Margin="0 10 0 0">
-                            <!-- Black -->
-                            <StackPanel Margin="5">
-                                <Border Width="30" Height="20" Background="#1E1E1E" BorderBrush="#666" BorderThickness="1"/>
-                                <TextBlock Text="black" FontSize="10" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                            
-                            <!-- Dark Gray -->
-                            <StackPanel Margin="5">
-                                <Border Width="30" Height="20" Background="#505050" BorderBrush="#666" BorderThickness="1"/>
-                                <TextBlock Text="dark gray" FontSize="10" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                            
-                            <!-- Light Gray -->
-                            <StackPanel Margin="5">
-                                <Border Width="30" Height="20" Background="#B4B4B4" BorderBrush="#666" BorderThickness="1"/>
-                                <TextBlock Text="light gray" FontSize="10" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                            
-                            <!-- Red -->
-                            <StackPanel Margin="5">
-                                <Border Width="30" Height="20" Background="#B43232" BorderBrush="#666" BorderThickness="1"/>
-                                <TextBlock Text="red" FontSize="10" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                            
-                            <!-- Brown -->
-                            <StackPanel Margin="5">
-                                <Border Width="30" Height="20" Background="#785032" BorderBrush="#666" BorderThickness="1"/>
-                                <TextBlock Text="brown" FontSize="10" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                            
-                            <!-- Tan -->
-                            <StackPanel Margin="5">
-                                <Border Width="30" Height="20" Background="#D2B48C" BorderBrush="#666" BorderThickness="1"/>
-                                <TextBlock Text="tan" FontSize="10" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                            
-                            <!-- Green -->
-                            <StackPanel Margin="5">
-                                <Border Width="30" Height="20" Background="#50783C" BorderBrush="#666" BorderThickness="1"/>
-                                <TextBlock Text="green" FontSize="10" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                            
-                            <!-- Blue -->
-                            <StackPanel Margin="5">
-                                <Border Width="30" Height="20" Background="#3C6496" BorderBrush="#666" BorderThickness="1"/>
-                                <TextBlock Text="blue" FontSize="10" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                            
-                            <!-- White -->
-                            <StackPanel Margin="5">
-                                <Border Width="30" Height="20" Background="#F0F0F0" BorderBrush="#666" BorderThickness="1"/>
-                                <TextBlock Text="white" FontSize="10" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                            
-                            <!-- Other -->
-                            <StackPanel Margin="5">
-                                <Border Width="30" Height="20" Background="#808080" BorderBrush="#666" BorderThickness="1"/>
-                                <TextBlock Text="other" FontSize="10" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                        </WrapPanel>
+                        <Grid Margin="0 10 0 0" ColumnDefinitions="*, Auto">
+                            <TextBox Grid.Column="0" 
+                                     Text="{Binding ManualHexInput}" 
+                                     Watermark="#FF5733"
+                                     FontFamily="Consolas"
+                                     Margin="0 0 10 0"/>
+                            <Button Grid.Column="1" 
+                                    Content="Apply" 
+                                    Command="{Binding ApplyManualColorCommand}"
+                                    Classes="primary"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Color Information -->
+                <Border Classes="card">
+                    <StackPanel>
+                        <TextBlock Classes="h2" Text="About Color Selection"/>
+                        <TextBlock Text="The eyedropper tool captures the exact HEX color value from the satellite image. This provides precise color information for roof validation." 
+                                   TextWrapping="Wrap" FontSize="12" Foreground="#666666" Margin="0 0 0 10"/>
+                        
+                        <StackPanel Margin="0 15 0 0">
+                            <TextBlock Text="Tips for accurate color selection:" FontWeight="SemiBold" Margin="0 0 0 5"/>
+                            <TextBlock Text="• Click directly on the roof surface, avoiding shadows" FontSize="12" Margin="10 2 0 0"/>
+                            <TextBlock Text="• Avoid edges where roof meets walls or gutters" FontSize="12" Margin="10 2 0 0"/>
+                            <TextBlock Text="• Try multiple spots if the roof has variations" FontSize="12" Margin="10 2 0 0"/>
+                            <TextBlock Text="• The tool samples a small area around your click for accuracy" FontSize="12" Margin="10 2 0 0"/>
+                            <TextBlock Text="• Or enter a HEX color code manually if you know the exact value" FontSize="12" Margin="10 2 0 0"/>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
             </StackPanel>
