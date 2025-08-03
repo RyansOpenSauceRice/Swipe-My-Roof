@@ -3,7 +3,7 @@
 namespace SwipeMyRoof.Core.Models;
 
 /// <summary>
-/// Represents a building candidate for roof color validation
+/// Represents a building candidate for roof validation
 /// </summary>
 public class BuildingCandidate
 {
@@ -28,14 +28,29 @@ public class BuildingCandidate
     public string? ExistingRoofColor { get; set; }
     
     /// <summary>
+    /// Existing roof material tag from OSM, if any
+    /// </summary>
+    public string? ExistingRoofMaterial { get; set; }
+    
+    /// <summary>
     /// Proposed roof color from LLM or other source
     /// </summary>
     public ProposedColor? ProposedColor { get; set; }
     
     /// <summary>
+    /// Proposed roof material from LLM or other source
+    /// </summary>
+    public ProposedRoofMaterial? ProposedRoofMaterial { get; set; }
+    
+    /// <summary>
     /// User feedback on the proposed color
     /// </summary>
     public UserFeedback UserFeedback { get; set; } = UserFeedback.None;
+    
+    /// <summary>
+    /// User feedback on the proposed material
+    /// </summary>
+    public UserFeedback MaterialFeedback { get; set; } = UserFeedback.None;
     
     /// <summary>
     /// Session ID for tracking
@@ -46,6 +61,11 @@ public class BuildingCandidate
     /// Upload status of the building edit
     /// </summary>
     public UploadStatus UploadStatus { get; set; } = UploadStatus.NotStaged;
+    
+    /// <summary>
+    /// Whether the building has been processed for material detection
+    /// </summary>
+    public bool MaterialDetected { get; set; } = false;
 }
 
 /// <summary>
