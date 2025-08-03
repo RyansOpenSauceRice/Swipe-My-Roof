@@ -1,0 +1,192 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:SwipeMyRoof.AvaloniaUI.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="500"
+             x:Class="SwipeMyRoof.AvaloniaUI.Views.ColorPickerView"
+             x:DataType="vm:ColorPickerViewModel">
+
+    <UserControl.Styles>
+        <Style Selector="TextBlock.h2">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0 10 0 5"/>
+        </Style>
+        
+        <Style Selector="TextBlock.label">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0 5 0 2"/>
+        </Style>
+        
+        <Style Selector="Button">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Padding" Value="15 8"/>
+            <Setter Property="MinWidth" Value="100"/>
+        </Style>
+        
+        <Style Selector="Border.card">
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="Margin" Value="0 0 0 10"/>
+            <Setter Property="Background" Value="#F9F9F9"/>
+        </Style>
+        
+        <Style Selector="Border.color-preview">
+            <Setter Property="BorderBrush" Value="#666666"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="CornerRadius" Value="3"/>
+            <Setter Property="Width" Value="60"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Margin" Value="0 5 10 5"/>
+        </Style>
+        
+        <Style Selector="Image.clickable">
+            <Setter Property="Cursor" Value="Cross"/>
+        </Style>
+        
+        <Style Selector="Image.clickable:pointerover">
+            <Setter Property="Opacity" Value="0.9"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <!-- Header -->
+        <Border Grid.Row="0" Classes="card">
+            <StackPanel>
+                <TextBlock Classes="h2" Text="Manual Color Selection"/>
+                <TextBlock Text="{Binding Instructions}" FontStyle="Italic" Foreground="#666666"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- Main Content -->
+        <ScrollViewer Grid.Row="1" Margin="0 10 0 0">
+            <StackPanel>
+                <!-- Image with Eyedropper -->
+                <Border Classes="card">
+                    <StackPanel>
+                        <TextBlock Classes="h2" Text="Building Image"/>
+                        <TextBlock Text="Click on the roof to pick its color" Margin="0 0 0 10" FontSize="12" Foreground="#666666"/>
+                        
+                        <Border Background="White" BorderBrush="#CCCCCC" BorderThickness="1" 
+                                CornerRadius="3" Padding="5" Margin="0 10 0 0">
+                            <Panel>
+                                <!-- Image -->
+                                <Image Source="{Binding Image}" 
+                                       Stretch="Uniform" 
+                                       MaxHeight="300"
+                                       Classes.clickable="{Binding IsPickingColor}"
+                                       PointerPressed="OnImagePointerPressed"/>
+                                
+                                <!-- Crosshair overlay when picking -->
+                                <Canvas IsVisible="{Binding IsPickingColor}" 
+                                        Background="Transparent"
+                                        PointerPressed="OnImagePointerPressed">
+                                    <!-- This will show a crosshair cursor -->
+                                </Canvas>
+                            </Panel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Color Preview -->
+                <Border Classes="card" IsVisible="{Binding ShowColorPreview}">
+                    <StackPanel>
+                        <TextBlock Classes="h2" Text="Selected Color"/>
+                        
+                        <Grid ColumnDefinitions="Auto,*" Margin="0 10 0 0">
+                            <!-- Color Swatch -->
+                            <Border Grid.Column="0" Classes="color-preview" 
+                                    Background="{Binding SelectedColorBrush}"/>
+                            
+                            <!-- Color Details -->
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Classes="label" Text="HEX Color:"/>
+                                <TextBlock Text="{Binding SelectedColorHex}" FontFamily="Consolas" FontWeight="Bold" Margin="0 0 0 5"/>
+                                
+                                <TextBlock Classes="label" Text="RGB Values:"/>
+                                <TextBlock Text="{Binding RgbValuesText}" FontFamily="Consolas" Margin="0 0 0 5"/>
+                                
+                                <TextBlock Classes="label" Text="Color Description:"/>
+                                <TextBlock Text="{Binding SelectedColorDescription}" Margin="0 0 0 5"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Manual HEX Input -->
+                <Border Classes="card">
+                    <StackPanel>
+                        <TextBlock Classes="h2" Text="Manual HEX Entry"/>
+                        <TextBlock Text="Enter a HEX color code directly if you know the exact color value." 
+                                   FontSize="12" Foreground="#666666" Margin="0 0 0 10"/>
+                        
+                        <Grid Margin="0 10 0 0" ColumnDefinitions="*, Auto">
+                            <TextBox Grid.Column="0" 
+                                     Text="{Binding ManualHexInput}" 
+                                     Watermark="#FF5733"
+                                     FontFamily="Consolas"
+                                     Margin="0 0 10 0"/>
+                            <Button Grid.Column="1" 
+                                    Content="Apply" 
+                                    Command="{Binding ApplyManualColorCommand}"
+                                    Classes="primary"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Color Information -->
+                <Border Classes="card">
+                    <StackPanel>
+                        <TextBlock Classes="h2" Text="About Color Selection"/>
+                        <TextBlock Text="The eyedropper tool captures the exact HEX color value from the satellite image. This provides precise color information for roof validation." 
+                                   TextWrapping="Wrap" FontSize="12" Foreground="#666666" Margin="0 0 0 10"/>
+                        
+                        <StackPanel Margin="0 15 0 0">
+                            <TextBlock Text="Tips for accurate color selection:" FontWeight="SemiBold" Margin="0 0 0 5"/>
+                            <TextBlock Text="• Click directly on the roof surface, avoiding shadows" FontSize="12" Margin="10 2 0 0"/>
+                            <TextBlock Text="• Avoid edges where roof meets walls or gutters" FontSize="12" Margin="10 2 0 0"/>
+                            <TextBlock Text="• Try multiple spots if the roof has variations" FontSize="12" Margin="10 2 0 0"/>
+                            <TextBlock Text="• The tool samples a small area around your click for accuracy" FontSize="12" Margin="10 2 0 0"/>
+                            <TextBlock Text="• Or enter a HEX color code manually if you know the exact value" FontSize="12" Margin="10 2 0 0"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+        
+        <!-- Action Buttons -->
+        <Border Grid.Row="2" Background="#F5F5F5" BorderBrush="#CCCCCC" BorderThickness="0 1 0 0" Padding="10" Margin="0 10 0 0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Command="{Binding StartPickingCommand}" 
+                        Background="#2196F3" 
+                        IsVisible="{Binding !IsPickingColor}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="🎯" Margin="0 0 5 0"/>
+                        <TextBlock Text="Pick Color"/>
+                    </StackPanel>
+                </Button>
+                
+                <Button Command="{Binding CancelCommand}" 
+                        Background="#757575"
+                        IsVisible="{Binding IsPickingColor}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="✕" Margin="0 0 5 0"/>
+                        <TextBlock Text="Cancel"/>
+                    </StackPanel>
+                </Button>
+                
+                <Button Command="{Binding ConfirmColorCommand}" 
+                        Background="#4CAF50"
+                        IsVisible="{Binding ShowColorPreview}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="✓" Margin="0 0 5 0"/>
+                        <TextBlock Text="Confirm Color"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
