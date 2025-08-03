@@ -57,10 +57,10 @@ Core focus: minimize user friction, maximize accuracy and trust from the OSM com
 ## UI / UX Requirements
 
 ### Core Interaction Screen
-- Building crop (satellite imagery from Bing Maps or other source).
+- Building crop (satellite imagery from Bing Maps or other source) with fixed view.
 - Proposed roof color (swatch or overlay).
 - **Yes** (green) / **No** (red) buttons.
-- Swipe gestures for accept/reject.
+- Swipe gestures for accept/reject (similar to dating apps).
 - **Skip** option.
 - **Undo** last decision (local only).
 - Confidence indicator (icon + optional tooltip).
@@ -68,6 +68,7 @@ Core focus: minimize user friction, maximize accuracy and trust from the OSM com
   - Imagery fetch failure.
   - LLM timeout or failure.
   - Low-confidence suggestions.
+- Note: Users cannot manipulate the satellite imagery view (no panning, zooming, or rotating).
 
 ### Edit Modal
 - Opens on tap.
@@ -78,13 +79,17 @@ Core focus: minimize user friction, maximize accuracy and trust from the OSM com
 ---
 
 ## Image Handling
-- Crop to building footprint with slight buffer (~0.3 of building size).
+- Crop to building footprint with fixed buffer ratio (~0.3 of building size).
 - Downsample if too large; pad if resolution insufficient.
 - Support multiple resolutions:
   - Default 64×64 for minimal token use.
   - Optional higher res (up to 128×128) if budget permits.
 - Include metadata: building-to-background ratio, image quality status.
 - If image is incomplete or quality too low, flag and allow skip.
+- **Important constraints:**
+  - Users cannot move, rotate, or zoom the satellite imagery
+  - Each building is presented with a fixed view and consistent framing
+  - The application is not a general-purpose OSM editor but a focused validation tool
 
 ---
 
@@ -363,3 +368,9 @@ When image quality is poor or colors are ambiguous:
 - Add optional "secondary_color" field for multi-tone roofs
 - Include "method" field in all responses for audit ("llm", "local_model", "fallback")
 - Support additional palettes for region-specific colors
+
+### Non-Goals
+- Historical imagery support - the application focuses only on the latest available imagery
+- Offline mode with pre-downloaded tiles - the application is not designed to archive or store valuable data
+- Full OSM editor functionality - this is a focused validation tool, not a general-purpose editor
+- Complex imagery manipulation - users cannot move, rotate, or zoom the satellite imagery
