@@ -4,12 +4,26 @@ using SwipeMyRoof.Core.Models;
 namespace SwipeMyRoof.Core.Data;
 
 /// <summary>
-/// Database context for storing validated building data
+/// Database context for storing validated building data using SQLite
 /// </summary>
 public class ValidationDbContext : DbContext
 {
     public ValidationDbContext(DbContextOptions<ValidationDbContext> options) : base(options)
     {
+    }
+    
+    /// <summary>
+    /// Configure SQLite database for development/testing
+    /// </summary>
+    /// <param name="databasePath">Path to SQLite database file</param>
+    /// <returns>Configured DbContextOptions</returns>
+    public static DbContextOptions<ValidationDbContext> CreateSqliteOptions(string databasePath)
+    {
+        return new DbContextOptionsBuilder<ValidationDbContext>()
+            .UseSqlite($"Data Source={databasePath}")
+            .EnableSensitiveDataLogging(false) // Privacy-first: no sensitive data in logs
+            .EnableDetailedErrors(false) // Production-ready error handling
+            .Options;
     }
     
     /// <summary>

@@ -24,6 +24,8 @@ This document outlines the requirements and best practices for making the Roof C
 - Reproducible builds
 - No tracking or analytics libraries
 - All network connections must be documented and justified
+- **Database**: SQLite (public domain, fully open source)
+- **Local storage only**: No external database connections
 
 ---
 

@@ -326,6 +326,13 @@ When image quality is poor or colors are ambiguous:
 - No Google dependencies (FDroid/GrapheneOS compatible)
 - Reproducible builds for FDroid inclusion
 
+### Database & Storage
+- **SQLite** for local data persistence (public domain, F-Droid compatible)
+- Entity Framework Core with SQLite provider
+- All data stored locally on device for privacy
+- No external database dependencies or network connections
+- Automatic database initialization and migrations
+
 ### Documentation Structure
 - README.md: User-focused overview for OSM editors (non-technical)
 - docs/spec.md: Technical specification for developers
