@@ -1,0 +1,98 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:SwipeMyRoof.UI.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="450"
+             x:Class="SwipeMyRoof.AvaloniaUI.Views.OsmAuthView"
+             x:DataType="vm:OsmAuthViewModel">
+
+  <Design.DataContext>
+    <vm:OsmAuthViewModel />
+  </Design.DataContext>
+
+  <Grid RowDefinitions="Auto,*,Auto" Margin="20">
+    <TextBlock Grid.Row="0" 
+               Text="OpenStreetMap Authentication" 
+               FontSize="20" 
+               FontWeight="Bold" 
+               HorizontalAlignment="Center"
+               Margin="0,0,0,20" />
+    
+    <ScrollViewer Grid.Row="1">
+      <StackPanel Spacing="15">
+        <!-- Not authenticated state -->
+        <StackPanel IsVisible="{Binding !IsAuthenticated}">
+          <TextBlock Text="You need to authenticate with OpenStreetMap to upload edits." 
+                     TextWrapping="Wrap"
+                     Margin="0,0,0,10" />
+          
+          <Button Content="Start Authentication" 
+                  Command="{Binding StartAuthCommand}"
+                  IsEnabled="{Binding !IsAuthenticating}"
+                  HorizontalAlignment="Center" />
+          
+          <!-- Auth URL section -->
+          <StackPanel IsVisible="{Binding AuthUrl, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                      Margin="0,15,0,0">
+            <TextBlock Text="Please open this URL in your browser to authenticate:" 
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,5" />
+            
+            <SelectableTextBlock Text="{Binding AuthUrl}" 
+                                TextWrapping="Wrap"
+                                Margin="0,0,0,10" />
+            
+            <Button Content="Copy URL" 
+                    HorizontalAlignment="Center"
+                    Margin="0,0,0,15">
+              <Button.Flyout>
+                <Flyout>
+                  <TextBlock Text="URL copied to clipboard!" />
+                </Flyout>
+              </Button.Flyout>
+            </Button>
+            
+            <TextBlock Text="After authorizing, you will receive a verification code. Enter it below:" 
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,5" />
+            
+            <TextBox Text="{Binding Verifier}" 
+                     Watermark="Verification code"
+                     Margin="0,0,0,10" />
+            
+            <Button Content="Complete Authentication" 
+                    Command="{Binding CompleteAuthCommand}"
+                    IsEnabled="{Binding !IsAuthenticating}"
+                    HorizontalAlignment="Center" />
+          </StackPanel>
+        </StackPanel>
+        
+        <!-- Authenticated state -->
+        <StackPanel IsVisible="{Binding IsAuthenticated}">
+          <TextBlock Text="You are authenticated with OpenStreetMap." 
+                     TextWrapping="Wrap"
+                     Margin="0,0,0,10" />
+          
+          <TextBlock Text="{Binding Username, StringFormat='Username: {0}'}" 
+                     TextWrapping="Wrap"
+                     Margin="0,0,0,15" />
+          
+          <Button Content="Sign Out" 
+                  Command="{Binding SignOutCommand}"
+                  HorizontalAlignment="Center" />
+        </StackPanel>
+        
+        <!-- Loading indicator -->
+        <ProgressBar IsIndeterminate="True" 
+                     IsVisible="{Binding IsAuthenticating}" 
+                     Margin="0,10,0,0" />
+      </StackPanel>
+    </ScrollViewer>
+    
+    <Button Grid.Row="2" 
+            Content="Back" 
+            HorizontalAlignment="Center"
+            Margin="0,20,0,0" />
+  </Grid>
+</UserControl>
