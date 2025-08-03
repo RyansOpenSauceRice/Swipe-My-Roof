@@ -67,9 +67,9 @@ The project is currently in Stage 1 (MVP) development. The core architecture and
 
 ### Next Steps
 
-- [ ] Implement MAUI UI for mobile platforms
+- [x] Implement Avalonia UI for cross-platform support with Android focus
 - [ ] Add decoy detection and user reliability tracking
-- [ ] Improve the interface with swipe gestures
+- [x] Improve the interface with swipe gestures
 - [ ] Support multiple AI endpoints and local models
 - [ ] Add asynchronous upload queue with conflict resolution
 
@@ -81,11 +81,18 @@ The project is currently in Stage 1 (MVP) development. The core architecture and
 - OpenAI API key (or other compatible AI API)
 - Bing Maps API key (for satellite imagery)
 - OpenStreetMap account
+- For Android development:
+  - Android SDK
+  - Java JDK 11 or newer
 
 ### Building the Project
 
 ```bash
+# Build the entire solution
 dotnet build
+
+# Build the Android app specifically
+dotnet build src/SwipeMyRoof.AvaloniaUI.Android/SwipeMyRoof.AvaloniaUI.Android.csproj -c Release
 ```
 
 ### Running the Console Demo
@@ -93,6 +100,44 @@ dotnet build
 ```bash
 dotnet run --project src/SwipeMyRoof.ConsoleApp/SwipeMyRoof.ConsoleApp.csproj
 ```
+
+### Building and Deploying for Android
+
+1. Install the Android workload:
+   ```
+   dotnet workload install android
+   ```
+
+2. Build the Android app:
+   ```
+   dotnet build src/SwipeMyRoof.AvaloniaUI.Android/SwipeMyRoof.AvaloniaUI.Android.csproj -c Release
+   ```
+
+3. Create an APK:
+   ```
+   dotnet publish src/SwipeMyRoof.AvaloniaUI.Android/SwipeMyRoof.AvaloniaUI.Android.csproj -c Release -f net8.0-android
+   ```
+
+4. Deploy to a connected Android device:
+   ```
+   dotnet build src/SwipeMyRoof.AvaloniaUI.Android/SwipeMyRoof.AvaloniaUI.Android.csproj -t:Install
+   ```
+
+### F-Droid Publishing
+
+To publish the app on F-Droid:
+
+1. Create a signing key (if you don't already have one):
+   ```
+   keytool -genkey -v -keystore swipemyroof.keystore -alias swipemyroof -keyalg RSA -keysize 2048 -validity 10000
+   ```
+
+2. Sign the APK:
+   ```
+   jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore swipemyroof.keystore SwipeMyRoof.AvaloniaUI.Android.apk swipemyroof
+   ```
+
+3. Create a metadata file for F-Droid in the format required by their repository.
 
 ## License
 
