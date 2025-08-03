@@ -24,28 +24,13 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y \
-          libfontconfig1-dev \
-          libfreetype6-dev \
-          libx11-dev \
-          libxrandr-dev \
-          libxi-dev \
-          libxcursor-dev \
-          libxinerama-dev \
-          libgl1-mesa-dev \
-          libglu1-mesa-dev \
-          libasound2-dev \
-          libpulse-dev \
-          libudev-dev \
-          libxss1 \
-          libgconf-2-4 \
-          libappindicator1 \
-          libnss3 \
-          libatk-bridge2.0-0 \
-          libdrm2 \
           libgtk-3-0 \
-          libgbm1 \
+          libx11-6 \
+          libfontconfig1 \
+          libfreetype6 \
           wget \
-          file
+          file \
+          fuse
           
     - name: Download AppImageTool
       run: |
