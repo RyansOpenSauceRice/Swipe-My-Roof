@@ -62,34 +62,19 @@ public interface IBingMapsService
 }
 
 /// <summary>
-/// Bing Maps imagery types
+/// Bing Maps imagery types for roof color analysis
 /// </summary>
 public enum BingImageryType
 {
     /// <summary>
-    /// Aerial satellite imagery
+    /// Aerial satellite imagery (primary for roof color analysis)
     /// </summary>
     Aerial,
     
     /// <summary>
-    /// Aerial imagery with road labels
+    /// Road map view (for lightweight area selection only)
     /// </summary>
-    AerialWithLabels,
-    
-    /// <summary>
-    /// Road map view
-    /// </summary>
-    Road,
-    
-    /// <summary>
-    /// Canvas (light map style)
-    /// </summary>
-    CanvasLight,
-    
-    /// <summary>
-    /// Canvas (dark map style)
-    /// </summary>
-    CanvasDark
+    Road
 }
 
 /// <summary>
@@ -346,11 +331,8 @@ public class BingMapsService : IBingMapsService
     {
         return imageType switch
         {
-            BingImageryType.Aerial => "a",
-            BingImageryType.AerialWithLabels => "h",
-            BingImageryType.Road => "r",
-            BingImageryType.CanvasLight => "c",
-            BingImageryType.CanvasDark => "cd",
+            BingImageryType.Aerial => "a",  // Clean aerial for roof color analysis
+            BingImageryType.Road => "r",    // Road view for area selection
             _ => "a"
         };
     }

@@ -68,52 +68,14 @@ public partial class BuildingMapControl : UserControl
     
     private void OnBuildingOverlayChanged(object? sender, BuildingOverlay overlay)
     {
-        // Update the building overlay on the canvas (following GoMap's vector overlay approach)
+        // For roof color analysis, keep the overlay canvas clean
+        // Any visual overlays would interfere with accurate color perception
         if (_overlayCanvas == null) return;
         
         _overlayCanvas.Children.Clear();
         
-        if (overlay.OutlinePixels.Count < 3) return;
-        
-        // Create building outline polygon
-        var points = overlay.OutlinePixels.Select(p => new Point(p.X, p.Y)).ToArray();
-        
-        // Create filled polygon for building area
-        var fillGeometry = new PolylineGeometry(points, true);
-        var fillPath = new Avalonia.Controls.Shapes.Path
-        {
-            Data = fillGeometry,
-            Fill = new SolidColorBrush(Color.Parse("#44FF4444")), // Semi-transparent red
-            Stroke = null
-        };
-        
-        // Create outline stroke
-        var outlineGeometry = new PolylineGeometry(points, true);
-        var outlinePath = new Avalonia.Controls.Shapes.Path
-        {
-            Data = outlineGeometry,
-            Fill = null,
-            Stroke = new SolidColorBrush(Color.Parse("#FF4444")), // Red outline like GoMap
-            StrokeThickness = 3
-        };
-        
-        // Add to canvas
-        _overlayCanvas.Children.Add(fillPath);
-        _overlayCanvas.Children.Add(outlinePath);
-        
-        // Add center point marker
-        var centerEllipse = new Avalonia.Controls.Shapes.Ellipse
-        {
-            Width = 10,
-            Height = 10,
-            Fill = new SolidColorBrush(Colors.Yellow),
-            Stroke = new SolidColorBrush(Colors.Black),
-            StrokeThickness = 1
-        };
-        
-        Canvas.SetLeft(centerEllipse, overlay.CenterPixel.X - 5);
-        Canvas.SetTop(centerEllipse, overlay.CenterPixel.Y - 5);
-        _overlayCanvas.Children.Add(centerEllipse);
+        // Building outline data is still available for programmatic use
+        // but not visually rendered to avoid color interference
     }
     
     #region Gesture Handling (Swipe Detection)

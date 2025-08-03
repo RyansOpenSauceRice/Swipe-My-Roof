@@ -274,9 +274,8 @@ public class BuildingMapViewModel : ViewModelBase
     {
         _currentImageryType = _currentImageryType switch
         {
-            BingImageryType.Aerial => BingImageryType.AerialWithLabels,
-            BingImageryType.AerialWithLabels => BingImageryType.Road,
-            BingImageryType.Road => BingImageryType.Aerial,
+            BingImageryType.Aerial => BingImageryType.Road,  // Aerial → Road for area selection
+            BingImageryType.Road => BingImageryType.Aerial,  // Road → Aerial for color analysis
             _ => BingImageryType.Aerial
         };
         

@@ -120,8 +120,8 @@ public class BuildingOverlayService : IBuildingOverlayService
         // Calculate area (simplified calculation)
         overlay.AreaSquareMeters = CalculateBuildingArea(overlay.OutlineCoordinates);
         
-        // Set highlight color (could be based on proposed roof color)
-        overlay.HighlightColor = "#FF4444"; // Red highlight like GoMap
+        // No highlight color needed for clean roof color analysis
+        overlay.HighlightColor = "transparent";
         
         return overlay;
     }
@@ -141,73 +141,9 @@ public class BuildingOverlayService : IBuildingOverlayService
     /// <inheritdoc />
     public async Task<byte[]> CreateCompositeImageAsync(byte[] satelliteImageData, BuildingOverlay overlay)
     {
-        try
-        {
-            // Use SkiaSharp to create composite image (similar to GoMap's rendering)
-            using var originalBitmap = SKBitmap.Decode(satelliteImageData);
-            using var surface = SKSurface.Create(new SKImageInfo(originalBitmap.Width, originalBitmap.Height));
-            using var canvas = surface.Canvas;
-            
-            // Draw the satellite image as base layer
-            canvas.DrawBitmap(originalBitmap, 0, 0);
-            
-            // Draw building outline overlay (following GoMap's style)
-            if (overlay.OutlinePixels.Count > 2)
-            {
-                using var outlinePaint = new SKPaint
-                {
-                    Color = SKColor.Parse("#FF4444"), // Red outline like GoMap
-                    Style = SKPaintStyle.Stroke,
-                    StrokeWidth = 3,
-                    IsAntialias = true
-                };
-                
-                using var fillPaint = new SKPaint
-                {
-                    Color = SKColor.Parse("#44FF4444"), // Semi-transparent red fill
-                    Style = SKPaintStyle.Fill,
-                    IsAntialias = true
-                };
-                
-                // Create path from building outline
-                using var path = new SKPath();
-                var firstPoint = overlay.OutlinePixels.First();
-                path.MoveTo((float)firstPoint.X, (float)firstPoint.Y);
-                
-                foreach (var point in overlay.OutlinePixels.Skip(1))
-                {
-                    path.LineTo((float)point.X, (float)point.Y);
-                }
-                path.Close();
-                
-                // Draw filled area first, then outline
-                canvas.DrawPath(path, fillPaint);
-                canvas.DrawPath(path, outlinePaint);
-                
-                // Draw center point
-                using var centerPaint = new SKPaint
-                {
-                    Color = SKColors.Yellow,
-                    Style = SKPaintStyle.Fill,
-                    IsAntialias = true
-                };
-                
-                canvas.DrawCircle(
-                    (float)overlay.CenterPixel.X, 
-                    (float)overlay.CenterPixel.Y, 
-                    5, 
-                    centerPaint);
-            }
-            
-            // Convert to byte array
-            using var image = surface.Snapshot();
-            using var data = image.Encode(SKEncodedImageFormat.Jpeg, 90);
-            return data.ToArray();
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException($"Failed to create composite image: {ex.Message}", ex);
-        }
+        // For roof color analysis, return clean satellite imagery without overlays
+        // Overlays would interfere with accurate color perception
+        return satelliteImageData;
     }
     
     private static double CalculateBuildingArea(List<GeographicCoordinate> coordinates)
