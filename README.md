@@ -23,6 +23,61 @@ For detailed specifications, see:
 - [prompts.md](docs/prompts.md) - LLM prompt design and response formats
 - [fdroid_manifest.md](docs/fdroid_manifest.md) - F-Droid compatibility guidelines
 
+## Project Structure
+
+The project is organized into the following modules:
+
+- **Core**: Domain models and shared logic
+- **LLM**: LLM service for roof color inference
+- **OSM**: OpenStreetMap authentication and data operations
+- **Images**: Satellite image retrieval and processing
+- **Storage**: Local persistence and session management
+- **Settings**: Application configuration
+- **ConsoleApp**: Simple console demo of the core functionality
+
 ## Development Status
 
-This project is in the planning stage. See the specification documents for the planned build stages.
+The project is currently in Stage 1 (MVP) development. The core architecture and domain models have been implemented, and a simple console demo is available to demonstrate the basic functionality.
+
+### Current Implementation
+
+- ✅ Core domain models
+- ✅ LLM service interface and OpenAI implementation
+- ✅ OSM service interface and basic implementation
+- ✅ Image service interface and Bing Maps implementation
+- ✅ Storage service for local persistence
+- ✅ Settings service for application configuration
+- ✅ Console demo application
+
+### Next Steps
+
+- [ ] Implement MAUI UI for mobile platforms
+- [ ] Add decoy detection and user reliability tracking
+- [ ] Improve the interface with swipe gestures
+- [ ] Support multiple LLM endpoints and local models
+- [ ] Add asynchronous upload queue with conflict resolution
+
+## Getting Started
+
+### Prerequisites
+
+- .NET 8.0 SDK
+- OpenAI API key (or other compatible LLM API)
+- Bing Maps API key (for satellite imagery)
+- OpenStreetMap account
+
+### Building the Project
+
+```bash
+dotnet build
+```
+
+### Running the Console Demo
+
+```bash
+dotnet run --project src/SwipeMyRoof.ConsoleApp/SwipeMyRoof.ConsoleApp.csproj
+```
+
+## License
+
+This project is open source under the [MIT License](LICENSE).
