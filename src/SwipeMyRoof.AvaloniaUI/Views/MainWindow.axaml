@@ -1,0 +1,69 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:SwipeMyRoof.AvaloniaUI.ViewModels"
+        xmlns:views="using:SwipeMyRoof.AvaloniaUI.Views"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="768"
+        x:Class="SwipeMyRoof.AvaloniaUI.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Swipe My Roof"
+        MinWidth="1024" MinHeight="768">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Window.Styles>
+        <Style Selector="TabItem">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="15 10"/>
+            <Setter Property="Margin" Value="0 0 5 0"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,*">
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#2C3E50" Padding="20 10">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <TextBlock Grid.Column="0" Text="Swipe My Roof" Foreground="White" FontSize="24" FontWeight="Bold" VerticalAlignment="Center"/>
+                
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">
+                    <TextBlock Text="{Binding StatusMessage}" Foreground="White" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+        
+        <!-- Main Content -->
+        <TabControl Grid.Row="1" SelectedIndex="{Binding SelectedTabIndex}">
+            <!-- Building Validation Tab -->
+            <TabItem Header="Building Validation">
+                <views:BuildingValidationView DataContext="{Binding BuildingValidationViewModel}"/>
+            </TabItem>
+            
+            <!-- Queue Tab -->
+            <TabItem Header="Queue">
+                <TextBlock Text="Queue management will be implemented here" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </TabItem>
+            
+            <!-- Settings Tab -->
+            <TabItem Header="Settings">
+                <views:SettingsView DataContext="{Binding SettingsViewModel}"/>
+            </TabItem>
+            
+            <!-- About Tab -->
+            <TabItem Header="About">
+                <StackPanel Margin="20">
+                    <TextBlock Text="Swipe My Roof" FontSize="24" FontWeight="Bold" Margin="0 0 0 10"/>
+                    <TextBlock Text="A tool for OpenStreetMap volunteers to validate building information." TextWrapping="Wrap" Margin="0 0 0 10"/>
+                    <TextBlock Text="Version 1.0.0" Margin="0 0 0 10"/>
+                    <TextBlock Text="© 2025 Swipe My Roof Contributors" Margin="0 0 0 10"/>
+                    <TextBlock Text="Licensed under the MIT License" Margin="0 0 0 10"/>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>

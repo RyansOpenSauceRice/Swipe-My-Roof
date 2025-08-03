@@ -1,0 +1,127 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:SwipeMyRoof.AvaloniaUI.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="SwipeMyRoof.AvaloniaUI.Views.BuildingValidationView"
+             x:DataType="vm:BuildingValidationViewModel">
+
+    <UserControl.Styles>
+        <Style Selector="TextBlock.h1">
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0 0 0 10"/>
+        </Style>
+        
+        <Style Selector="TextBlock.h2">
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0 10 0 5"/>
+        </Style>
+        
+        <Style Selector="TextBlock.label">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0 10 0 5"/>
+        </Style>
+        
+        <Style Selector="Button">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Padding" Value="15 10"/>
+            <Setter Property="MinWidth" Value="100"/>
+        </Style>
+        
+        <Style Selector="Border.card">
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="Margin" Value="0 0 0 15"/>
+            <Setter Property="Background" Value="#F5F5F5"/>
+        </Style>
+        
+        <Style Selector="Border.warning">
+            <Setter Property="BorderBrush" Value="#FF8800"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="Margin" Value="0 0 0 15"/>
+            <Setter Property="Background" Value="#FFF8E1"/>
+        </Style>
+        
+        <Style Selector="Border.practice">
+            <Setter Property="BorderBrush" Value="#0077FF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="Margin" Value="0 0 0 15"/>
+            <Setter Property="Background" Value="#E3F2FD"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <!-- Practice Mode Banner -->
+        <Border Grid.Row="0" Classes="practice" IsVisible="{Binding IsPracticeMode}">
+            <TextBlock Text="{Binding GetPracticeModeBanner}" HorizontalAlignment="Center" FontWeight="Bold"/>
+        </Border>
+        
+        <Grid Grid.Row="1" ColumnDefinitions="*,*" Margin="20">
+            <!-- Left Column - Building Image -->
+            <Border Grid.Column="0" Classes="card" Margin="0 0 10 0">
+                <Grid RowDefinitions="Auto,*">
+                    <TextBlock Grid.Row="0" Classes="h2" Text="Building Image"/>
+                    <Border Grid.Row="1" Background="LightGray" Margin="0 10 0 0">
+                        <TextBlock Text="Building Image Placeholder" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        <!-- This would be replaced with an actual image control in a real implementation -->
+                    </Border>
+                </Grid>
+            </Border>
+            
+            <!-- Right Column - Building Information -->
+            <StackPanel Grid.Column="1" Margin="10 0 0 0">
+                <!-- Building Information -->
+                <Border Classes="card">
+                    <StackPanel>
+                        <TextBlock Classes="h2" Text="Building Information"/>
+                        <TextBlock Classes="label" Text="Building ID"/>
+                        <TextBlock Text="{Binding CurrentBuilding.OsmId}" Margin="0 0 0 10"/>
+                        
+                        <TextBlock Classes="label" Text="Proposed Color"/>
+                        <TextBlock Text="{Binding ProposedColorValue}" Margin="0 0 0 10"/>
+                        
+                        <TextBlock Classes="label" Text="Explanation"/>
+                        <TextBlock Text="{Binding ProposedColorExplanation}" TextWrapping="Wrap" Margin="0 0 0 10"/>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Confidence Indicator -->
+                <Border Classes="card" IsVisible="{Binding ShowConfidenceIndicator}">
+                    <StackPanel>
+                        <TextBlock Classes="h2" Text="AI Confidence"/>
+                        <ProgressBar Value="{Binding ConfidenceIndicator.ConfidencePercentage}" 
+                                     Minimum="0" Maximum="100" Height="20" Margin="0 5 0 5"/>
+                        <TextBlock Text="{Binding ConfidenceIndicator.Description}" Margin="0 5 0 0"/>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Warning Message -->
+                <Border Classes="warning" IsVisible="{Binding HasWarning}">
+                    <TextBlock Text="{Binding GetWarningMessage}" TextWrapping="Wrap"/>
+                </Border>
+            </StackPanel>
+        </Grid>
+        
+        <!-- Action Buttons -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 0 0 20">
+            <Button Command="{Binding RejectBuildingCommand}" Background="#FF5252">
+                Reject
+            </Button>
+            <Button Command="{Binding SkipBuildingCommand}" Background="#757575">
+                Skip
+            </Button>
+            <Button Command="{Binding AcceptBuildingCommand}" Background="#4CAF50">
+                Accept
+            </Button>
+        </StackPanel>
+    </Grid>
+</UserControl>
