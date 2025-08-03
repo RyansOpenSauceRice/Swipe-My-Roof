@@ -1,0 +1,119 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="SwipeMyRoof.AvaloniaUI.Controls.BuildingMapControl">
+
+    <UserControl.Styles>
+        <Style Selector="Border.map-container">
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Background" Value="#F0F0F0"/>
+        </Style>
+        
+        <Style Selector="TextBlock.attribution">
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Foreground" Value="#666666"/>
+            <Setter Property="Background" Value="#F0F0F0"/>
+            <Setter Property="Padding" Value="5 2"/>
+        </Style>
+        
+        <Style Selector="Button.map-control">
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="5"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid>
+        <!-- Map Container -->
+        <Border Classes="map-container">
+            <Grid>
+                <!-- Satellite Image Display -->
+                <Image Name="SatelliteImage" 
+                       Source="{Binding SatelliteImageSource}"
+                       Stretch="UniformToFill"
+                       IsVisible="{Binding HasSatelliteImage}"/>
+                
+                <!-- Building Overlay Canvas -->
+                <Canvas Name="BuildingOverlayCanvas"
+                        Background="Transparent"
+                        IsVisible="{Binding HasBuildingOverlay}"/>
+                
+                <!-- Loading Indicator -->
+                <Grid IsVisible="{Binding IsLoadingMap}" Background="#80FFFFFF">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <ProgressBar IsIndeterminate="True" Width="200" Height="4" Margin="0 0 0 10"/>
+                        <TextBlock Text="{Binding LoadingMessage}" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+                
+                <!-- Error Message -->
+                <Border Background="#FFEEEE" BorderBrush="#FF0000" BorderThickness="1" 
+                        CornerRadius="5" Margin="20" Padding="15"
+                        IsVisible="{Binding HasError}">
+                    <StackPanel>
+                        <TextBlock Text="Map Loading Error" FontWeight="Bold" Foreground="#CC0000"/>
+                        <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap" Margin="0 5 0 0"/>
+                        <Button Content="Retry" Command="{Binding RetryLoadMapCommand}" 
+                                HorizontalAlignment="Left" Margin="0 10 0 0"/>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Map Controls Overlay -->
+                <StackPanel Orientation="Vertical" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10">
+                    <!-- Zoom In -->
+                    <Button Classes="map-control" Command="{Binding ZoomInCommand}" ToolTip.Tip="Zoom In">
+                        <TextBlock Text="+" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    </Button>
+                    
+                    <!-- Zoom Out -->
+                    <Button Classes="map-control" Command="{Binding ZoomOutCommand}" ToolTip.Tip="Zoom Out">
+                        <TextBlock Text="−" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    </Button>
+                    
+                    <!-- Center on Building -->
+                    <Button Classes="map-control" Command="{Binding CenterOnBuildingCommand}" ToolTip.Tip="Center on Building">
+                        <TextBlock Text="🏠" FontSize="16" HorizontalAlignment="Center"/>
+                    </Button>
+                    
+                    <!-- Toggle Imagery Type -->
+                    <Button Classes="map-control" Command="{Binding ToggleImageryTypeCommand}" ToolTip.Tip="Toggle Imagery">
+                        <TextBlock Text="🗺️" FontSize="16" HorizontalAlignment="Center"/>
+                    </Button>
+                </StackPanel>
+                
+                <!-- Building Info Overlay -->
+                <Border Background="#FFFFFF" BorderBrush="#CCCCCC" BorderThickness="1" 
+                        CornerRadius="5" Padding="10" Margin="10"
+                        HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                        IsVisible="{Binding ShowBuildingInfo}">
+                    <StackPanel>
+                        <TextBlock Text="Building Information" FontWeight="Bold" Margin="0 0 0 5"/>
+                        <TextBlock Text="{Binding BuildingId}" Margin="0 0 0 2"/>
+                        <TextBlock Text="{Binding BuildingArea}" Margin="0 0 0 2"/>
+                        <TextBlock Text="{Binding ProposedColor}" Margin="0 0 0 2"/>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Attribution (Required by Bing Maps) -->
+                <TextBlock Classes="attribution" 
+                           Text="{Binding AttributionText}"
+                           HorizontalAlignment="Right" 
+                           VerticalAlignment="Bottom"
+                           IsVisible="{Binding HasAttribution}"/>
+            </Grid>
+        </Border>
+        
+        <!-- Gesture Overlay for Swipe Detection -->
+        <Border Name="GestureOverlay" 
+                Background="Transparent"
+                IsVisible="{Binding EnableSwipeGestures}"/>
+    </Grid>
+</UserControl>
