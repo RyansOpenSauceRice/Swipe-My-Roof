@@ -341,11 +341,9 @@ When image quality is poor or colors are ambiguous:
 - **Upload Queue**: Local staging with manual or automatic upload control
 
 ### Performance & Device Protection
-- **Adaptive Query Limits**: Smart building density detection prevents device overload
-- **Density-Based Limiting**: 
-  - Rural areas (Idaho): Up to 200 buildings per query
-  - Urban areas (LA): Limited to 10-50 buildings per query
-  - Automatic area subdivision for high-density regions
+- **Consistent Query Limits**: Maximum 200 buildings per query (all areas)
+- **Density Detection**: Smart area analysis for user information and recommendations
+- **Area Recommendations**: Suggests optimal area sizes based on building density
 - **Query Optimization**: Caching and intelligent area sampling
 - **Memory Management**: Queue-based processing with configurable limits
 

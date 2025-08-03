@@ -5,15 +5,15 @@ using SwipeMyRoof.OSM.Services;
 namespace SwipeMyRoof.Core.Services;
 
 /// <summary>
-/// Service for adaptively querying buildings with smart limits based on area density
+/// Service for querying buildings with consistent limits and density analysis
 /// </summary>
 public interface IAdaptiveBuildingQueryService
 {
     /// <summary>
-    /// Get buildings with adaptive limits based on area density
+    /// Get buildings with consistent 200 building limit and density analysis
     /// </summary>
     /// <param name="area">Area to query</param>
-    /// <param name="targetCount">Target number of buildings (will be adjusted based on density)</param>
+    /// <param name="targetCount">Target number of buildings (max 200)</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Query result with buildings and metadata</returns>
     Task<AdaptiveBuildingQueryResult> GetBuildingsAdaptivelyAsync(
@@ -96,7 +96,7 @@ public enum BuildingDensityLevel
 }
 
 /// <summary>
-/// Implementation of adaptive building query service
+/// Implementation of building query service with consistent limits and density analysis
 /// </summary>
 public class AdaptiveBuildingQueryService : IAdaptiveBuildingQueryService
 {
@@ -114,16 +114,8 @@ public class AdaptiveBuildingQueryService : IAdaptiveBuildingQueryService
         { BuildingDensityLevel.Extreme, (5000, double.MaxValue) }
     };
     
-    // Query limits based on density
-    private static readonly Dictionary<BuildingDensityLevel, int> MaxQueryLimits = new()
-    {
-        { BuildingDensityLevel.VeryLow, 200 },
-        { BuildingDensityLevel.Low, 150 },
-        { BuildingDensityLevel.Medium, 100 },
-        { BuildingDensityLevel.High, 50 },
-        { BuildingDensityLevel.VeryHigh, 25 },
-        { BuildingDensityLevel.Extreme, 10 }
-    };
+    // Consistent query limit for all areas
+    private const int MaxQueryLimit = 200;
     
     public AdaptiveBuildingQueryService(IOverpassService overpassService)
     {
@@ -153,13 +145,13 @@ public class AdaptiveBuildingQueryService : IAdaptiveBuildingQueryService
             var recommendation = await GetQueryRecommendationAsync(area, targetCount);
             result.Recommendation = recommendation;
             
-            // Determine actual query limit
-            var actualLimit = Math.Min(targetCount, recommendation.RecommendedLimit);
+            // Apply consistent limit of 200 buildings
+            var actualLimit = Math.Min(targetCount, MaxQueryLimit);
             
             if (actualLimit < targetCount)
             {
                 result.WasLimited = true;
-                result.LimitReason = $"Limited to {actualLimit} buildings due to {densityEstimate.DensityLevel} density area";
+                result.LimitReason = $"Limited to {actualLimit} buildings (maximum allowed per query)";
             }
             
             // Execute query with adaptive limit
@@ -253,9 +245,8 @@ public class AdaptiveBuildingQueryService : IAdaptiveBuildingQueryService
             DensityLevel = densityEstimate.DensityLevel
         };
         
-        // Get max limit for this density level
-        var maxLimit = MaxQueryLimits[densityEstimate.DensityLevel];
-        recommendation.RecommendedLimit = Math.Min(targetCount, maxLimit);
+        // Apply consistent 200 building limit
+        recommendation.RecommendedLimit = Math.Min(targetCount, MaxQueryLimit);
         
         // Calculate recommended radius for circular areas
         if (area.Type == AreaSelectionType.Radius)
@@ -263,15 +254,15 @@ public class AdaptiveBuildingQueryService : IAdaptiveBuildingQueryService
             recommendation.RecommendedRadiusKm = CalculateOptimalRadius(densityEstimate, targetCount);
         }
         
-        // Determine if area should be split
-        if (densityEstimate.EstimatedTotalBuildings > 500)
+        // Determine if area should be split for very large areas
+        if (densityEstimate.EstimatedTotalBuildings > 1000)
         {
             recommendation.ShouldSplitArea = true;
             recommendation.SuggestedSubAreas = GenerateSubAreas(area, 4); // Split into 4 quadrants
         }
         
         // Generate reasoning
-        recommendation.Reasoning = GenerateRecommendationReasoning(densityEstimate, targetCount, maxLimit);
+        recommendation.Reasoning = GenerateRecommendationReasoning(densityEstimate, targetCount, MaxQueryLimit);
         
         return recommendation;
     }
@@ -417,13 +408,13 @@ public class AdaptiveBuildingQueryService : IAdaptiveBuildingQueryService
         
         if (maxLimit < targetCount)
         {
-            reasoning += $"Limited to {maxLimit} buildings to prevent device overload. ";
+            reasoning += $"Limited to {maxLimit} buildings (maximum per query). ";
         }
         
-        if (density.RequiresLimiting)
+        if (density.EstimatedTotalBuildings > 1000)
         {
             reasoning += $"Estimated {density.EstimatedTotalBuildings} total buildings in area. ";
-            reasoning += "Consider using smaller areas or splitting the query.";
+            reasoning += "Consider using smaller areas for better coverage.";
         }
         
         return reasoning;
