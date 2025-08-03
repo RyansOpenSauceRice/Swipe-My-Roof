@@ -5,25 +5,26 @@ using SwipeMyRoof.OSM.Services;
 namespace SwipeMyRoof.Core.Services;
 
 /// <summary>
-/// Service for managing a queue of buildings for validation
+/// Service for managing a queue of buildings for validation with adaptive query limits
 /// </summary>
 public class BuildingQueueService : IBuildingQueueService
 {
-    private readonly IOverpassService _overpassService;
+    private readonly IAdaptiveBuildingQueryService _adaptiveQueryService;
     private readonly Queue<BuildingCandidate> _buildingQueue;
     private readonly HashSet<long> _processedBuildingIds;
     private AreaSelection? _currentArea;
     private int _processedCount;
     private const int MaxQueueSize = 20;
     private const int RefillThreshold = 5;
+    private BuildingDensityLevel? _areaDensityLevel;
     
     /// <summary>
     /// Constructor
     /// </summary>
-    /// <param name="overpassService">Overpass service for querying buildings</param>
-    public BuildingQueueService(IOverpassService overpassService)
+    /// <param name="adaptiveQueryService">Adaptive query service for smart building queries</param>
+    public BuildingQueueService(IAdaptiveBuildingQueryService adaptiveQueryService)
     {
-        _overpassService = overpassService;
+        _adaptiveQueryService = adaptiveQueryService;
         _buildingQueue = new Queue<BuildingCandidate>();
         _processedBuildingIds = new HashSet<long>();
         _processedCount = 0;
@@ -43,9 +44,18 @@ public class BuildingQueueService : IBuildingQueueService
             _currentArea = area;
             ClearQueue();
             
-            var buildings = await FetchBuildingsFromArea(area, MaxQueueSize, cancellationToken);
+            // Use adaptive query service to get buildings with smart limits
+            var queryResult = await _adaptiveQueryService.GetBuildingsAdaptivelyAsync(area, MaxQueueSize, cancellationToken);
+            _areaDensityLevel = queryResult.DensityLevel;
             
-            foreach (var building in buildings)
+            // Log query information for user awareness
+            if (queryResult.WasLimited)
+            {
+                Console.WriteLine($"Query limited: {queryResult.LimitReason}");
+                Console.WriteLine($"Density: {queryResult.DensityLevel} ({queryResult.EstimatedDensity:F0} buildings/km²)");
+            }
+            
+            foreach (var building in queryResult.Buildings)
             {
                 var candidate = ConvertToBuildingCandidate(building);
                 _buildingQueue.Enqueue(candidate);
@@ -116,8 +126,9 @@ public class BuildingQueueService : IBuildingQueueService
             if (neededBuildings <= 0)
                 return true;
             
-            // Fetch more buildings, requesting extra to account for already processed ones
-            var buildings = await FetchBuildingsFromArea(_currentArea, neededBuildings * 2, cancellationToken);
+            // Use adaptive query to fetch more buildings with smart limits
+            var queryResult = await _adaptiveQueryService.GetBuildingsAdaptivelyAsync(_currentArea, neededBuildings * 2, cancellationToken);
+            var buildings = queryResult.Buildings;
             
             var addedCount = 0;
             foreach (var building in buildings)
@@ -155,18 +166,13 @@ public class BuildingQueueService : IBuildingQueueService
         _processedCount = 0;
     }
     
-    private async Task<List<OsmBuilding>> FetchBuildingsFromArea(AreaSelection area, int limit, CancellationToken cancellationToken)
+    /// <summary>
+    /// Get information about the current area's building density
+    /// </summary>
+    /// <returns>Density level of current area, or null if no area set</returns>
+    public BuildingDensityLevel? GetAreaDensityLevel()
     {
-        return area.Type switch
-        {
-            AreaSelectionType.Radius when area.Center != null => 
-                await _overpassService.GetBuildingsInRadiusAsync(area.Center, area.Radius, limit, true, cancellationToken),
-            
-            AreaSelectionType.Rectangle when area.BoundingBox != null => 
-                await _overpassService.GetBuildingsInBoundingBoxAsync(area.BoundingBox, limit, true, cancellationToken),
-            
-            _ => new List<OsmBuilding>()
-        };
+        return _areaDensityLevel;
     }
     
     private static BuildingCandidate ConvertToBuildingCandidate(OsmBuilding building)

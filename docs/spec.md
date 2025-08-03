@@ -333,6 +333,22 @@ When image quality is poor or colors are ambiguous:
 - No external database dependencies or network connections
 - Automatic database initialization and migrations
 
+### OpenStreetMap Integration
+- **Complete OSM Submission Pipeline**: Validated buildings uploaded via OSM API
+- **Changeset Management**: Proper changeset creation, upload, and closing
+- **Conflict Detection**: Check for building modifications before upload
+- **Batch Processing**: Efficient upload of multiple validated buildings
+- **Upload Queue**: Local staging with manual or automatic upload control
+
+### Performance & Device Protection
+- **Adaptive Query Limits**: Smart building density detection prevents device overload
+- **Density-Based Limiting**: 
+  - Rural areas (Idaho): Up to 200 buildings per query
+  - Urban areas (LA): Limited to 10-50 buildings per query
+  - Automatic area subdivision for high-density regions
+- **Query Optimization**: Caching and intelligent area sampling
+- **Memory Management**: Queue-based processing with configurable limits
+
 ### Documentation Structure
 - README.md: User-focused overview for OSM editors (non-technical)
 - docs/spec.md: Technical specification for developers
