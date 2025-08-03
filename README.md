@@ -65,79 +65,42 @@ The project is currently in Stage 1 (MVP) development. The core architecture and
 - ✅ Settings service for application configuration
 - ✅ Console demo application with confidence indicator demo
 
-### Next Steps
+### Current Development Status
 
-- [x] Implement Avalonia UI for cross-platform support with Android focus
-- [ ] Add decoy detection and user reliability tracking
-- [x] Improve the interface with swipe gestures
-- [ ] Support multiple AI endpoints and local models
-- [ ] Add asynchronous upload queue with conflict resolution
+- ✅ Core architecture and domain models
+- ✅ UI controls including confidence indicators
+- ✅ AI service interface and implementation
+- ✅ OSM service interface and basic implementation
+- ✅ Image service interface and implementation
+- ✅ Storage service for local persistence
+- ✅ Settings service for application configuration
+- ✅ Cross-platform UI with mobile-first design
+- ✅ Responsive layout with swipe gestures
+
+### Coming Soon
+
+- Decoy detection and user reliability tracking
+- Support for multiple AI endpoints and local models
+- Asynchronous upload queue with conflict resolution
+- F-Droid publication
 
 ## Getting Started
 
-### Prerequisites
+### For OSM Volunteers
 
-- .NET 8.0 SDK
-- OpenAI API key (or other compatible AI API)
-- Bing Maps API key (for satellite imagery)
-- OpenStreetMap account
-- For Android development:
-  - Android SDK
-  - Java JDK 11 or newer
+To use Swipe-My-Roof, you'll need:
 
-### Building the Project
+- An OpenStreetMap account
+- An API key for the AI service (we'll provide instructions in the app)
+- Android device (F-Droid compatible)
 
-```bash
-# Build the entire solution
-dotnet build
+The app will be available on F-Droid once it reaches beta status. In the meantime, if you'd like to test early versions, please contact the development team.
 
-# Build the Android app specifically
-dotnet build src/SwipeMyRoof.AvaloniaUI.Android/SwipeMyRoof.AvaloniaUI.Android.csproj -c Release
-```
+### Learning More
 
-### Running the Console Demo
+For more information about how to use the application:
 
-```bash
-dotnet run --project src/SwipeMyRoof.ConsoleApp/SwipeMyRoof.ConsoleApp.csproj
-```
-
-### Building and Deploying for Android
-
-1. Install the Android workload:
-   ```
-   dotnet workload install android
-   ```
-
-2. Build the Android app:
-   ```
-   dotnet build src/SwipeMyRoof.AvaloniaUI.Android/SwipeMyRoof.AvaloniaUI.Android.csproj -c Release
-   ```
-
-3. Create an APK:
-   ```
-   dotnet publish src/SwipeMyRoof.AvaloniaUI.Android/SwipeMyRoof.AvaloniaUI.Android.csproj -c Release -f net8.0-android
-   ```
-
-4. Deploy to a connected Android device:
-   ```
-   dotnet build src/SwipeMyRoof.AvaloniaUI.Android/SwipeMyRoof.AvaloniaUI.Android.csproj -t:Install
-   ```
-
-### F-Droid Publishing
-
-To publish the app on F-Droid:
-
-1. Create a signing key (if you don't already have one):
-   ```
-   keytool -genkey -v -keystore swipemyroof.keystore -alias swipemyroof -keyalg RSA -keysize 2048 -validity 10000
-   ```
-
-2. Sign the APK:
-   ```
-   jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore swipemyroof.keystore SwipeMyRoof.AvaloniaUI.Android.apk swipemyroof
-   ```
-
-3. Create a metadata file for F-Droid in the format required by their repository.
+- [User Guide](docs/user_guide.md) - Detailed instructions for OSM volunteers
 
 ## License
 
