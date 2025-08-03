@@ -4,6 +4,10 @@
     <ProjectReference Include="..\SwipeMyRoof.Core\SwipeMyRoof.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="OAuth.DotNetCore" Version="3.0.1" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>

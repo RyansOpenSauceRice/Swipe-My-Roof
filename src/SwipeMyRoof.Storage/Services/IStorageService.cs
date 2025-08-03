@@ -9,6 +9,35 @@ namespace SwipeMyRoof.Storage.Services;
 public interface IStorageService
 {
     /// <summary>
+    /// Get a value from storage
+    /// </summary>
+    /// <typeparam name="T">Type of value</typeparam>
+    /// <param name="key">Key</param>
+    /// <returns>Value, or default if not found</returns>
+    T? Get<T>(string key);
+    
+    /// <summary>
+    /// Set a value in storage
+    /// </summary>
+    /// <typeparam name="T">Type of value</typeparam>
+    /// <param name="key">Key</param>
+    /// <param name="value">Value</param>
+    void Set<T>(string key, T value);
+    
+    /// <summary>
+    /// Delete a value from storage
+    /// </summary>
+    /// <param name="key">Key</param>
+    void Delete(string key);
+    
+    /// <summary>
+    /// Check if a key exists in storage
+    /// </summary>
+    /// <param name="key">Key</param>
+    /// <returns>True if key exists</returns>
+    bool Exists(string key);
+    
+    /// <summary>
     /// Create a new validation session
     /// </summary>
     /// <param name="userId">User ID</param>
