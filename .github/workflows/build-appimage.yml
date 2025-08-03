@@ -1,0 +1,237 @@
+name: Build AppImage
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:  # Allow manual triggering
+    inputs:
+      create_release:
+        description: 'Create a GitHub release'
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  build-appimage:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+        
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libfontconfig1-dev \
+          libfreetype6-dev \
+          libx11-dev \
+          libxrandr-dev \
+          libxi-dev \
+          libxcursor-dev \
+          libxinerama-dev \
+          libgl1-mesa-dev \
+          libglu1-mesa-dev \
+          libasound2-dev \
+          libpulse-dev \
+          libudev-dev \
+          libxss1 \
+          libgconf-2-4 \
+          libappindicator1 \
+          libnss3 \
+          libatk-bridge2.0-0 \
+          libdrm2 \
+          libgtk-3-0 \
+          libgbm1 \
+          wget \
+          file
+          
+    - name: Download AppImageTool
+      run: |
+        wget -O appimagetool https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+        chmod +x appimagetool
+        
+    - name: Restore and build
+      run: |
+        dotnet restore src/SwipeMyRoof.AvaloniaUI/SwipeMyRoof.AvaloniaUI.csproj
+        dotnet publish src/SwipeMyRoof.AvaloniaUI/SwipeMyRoof.AvaloniaUI.csproj \
+          --configuration Release \
+          --runtime linux-x64 \
+          --self-contained true \
+          --output ./publish/linux-x64 \
+          -p:PublishSingleFile=false \
+          -p:PublishTrimmed=true \
+          -p:TrimMode=partial
+          
+    - name: Create AppDir structure
+      run: |
+        mkdir -p SwipeMyRoof.AppDir/usr/bin
+        mkdir -p SwipeMyRoof.AppDir/usr/share/applications
+        mkdir -p SwipeMyRoof.AppDir/usr/share/icons/hicolor/256x256/apps
+        
+        # Copy application files
+        cp -r ./publish/linux-x64/* SwipeMyRoof.AppDir/usr/bin/
+        
+        # Create desktop file
+        cat > SwipeMyRoof.AppDir/usr/share/applications/SwipeMyRoof.desktop << 'EOF'
+        [Desktop Entry]
+        Type=Application
+        Name=Swipe My Roof
+        Comment=Validate roof colors for OpenStreetMap
+        Exec=SwipeMyRoof.AvaloniaUI
+        Icon=SwipeMyRoof
+        Categories=Graphics;Photography;Science;
+        Terminal=false
+        StartupWMClass=SwipeMyRoof.AvaloniaUI
+        EOF
+        
+        # Create a simple icon (you can replace this with a real icon later)
+        cat > SwipeMyRoof.AppDir/usr/share/icons/hicolor/256x256/apps/SwipeMyRoof.svg << 'EOF'
+        <svg width="256" height="256" xmlns="http://www.w3.org/2000/svg">
+          <rect width="256" height="256" fill="#4CAF50"/>
+          <rect x="64" y="64" width="128" height="96" fill="#2E7D32"/>
+          <polygon points="64,64 128,32 192,64" fill="#FF5722"/>
+          <text x="128" y="200" text-anchor="middle" fill="white" font-size="24" font-family="Arial">SMR</text>
+        </svg>
+        EOF
+        
+        # Create AppRun script
+        cat > SwipeMyRoof.AppDir/AppRun << 'EOF'
+        #!/bin/bash
+        SELF=$(readlink -f "$0")
+        HERE=${SELF%/*}
+        export PATH="${HERE}/usr/bin/:${PATH}"
+        export LD_LIBRARY_PATH="${HERE}/usr/lib/:${LD_LIBRARY_PATH}"
+        cd "${HERE}/usr/bin"
+        exec ./SwipeMyRoof.AvaloniaUI "$@"
+        EOF
+        chmod +x SwipeMyRoof.AppDir/AppRun
+        
+        # Copy desktop file to root
+        cp SwipeMyRoof.AppDir/usr/share/applications/SwipeMyRoof.desktop SwipeMyRoof.AppDir/
+        
+        # Copy icon to root
+        cp SwipeMyRoof.AppDir/usr/share/icons/hicolor/256x256/apps/SwipeMyRoof.svg SwipeMyRoof.AppDir/SwipeMyRoof.svg
+        
+    - name: Build AppImage
+      run: |
+        ./appimagetool SwipeMyRoof.AppDir SwipeMyRoof-x86_64.AppImage
+        chmod +x SwipeMyRoof-x86_64.AppImage
+        
+    - name: Test AppImage
+      run: |
+        # Basic test - just check if it's a valid AppImage
+        file SwipeMyRoof-x86_64.AppImage
+        ls -la SwipeMyRoof-x86_64.AppImage
+        
+    - name: Create release info
+      run: |
+        cat > RELEASE_INFO.md << EOF
+        # Swipe My Roof - Linux AppImage
+        
+        ## 🚀 One-Click Download & Run
+        
+        **Super Easy Installation:**
+        1. Download \`SwipeMyRoof-x86_64.AppImage\`
+        2. Make executable: \`chmod +x SwipeMyRoof-x86_64.AppImage\`
+        3. Double-click or run: \`./SwipeMyRoof-x86_64.AppImage\`
+        
+        **No installation required!** Everything is bundled in a single file.
+        
+        ## ✨ What's Included
+        
+        - ✅ **Bing Maps Integration**: Satellite imagery for roof analysis
+        - ✅ **OSM Submission**: Direct OpenStreetMap integration
+        - ✅ **AI-Powered Analysis**: Roof color validation
+        - ✅ **Clean UI**: Avalonia-based desktop interface
+        - ✅ **Self-Contained**: No dependencies to install
+        
+        ## 🖥️ System Requirements
+        
+        - **OS**: Linux x64 (Ubuntu 18.04+, Fedora 30+, or equivalent)
+        - **Graphics**: Any modern graphics driver
+        - **Memory**: 512MB RAM minimum
+        - **Storage**: ~100MB for the AppImage
+        
+        ## 🔧 First Run Setup
+        
+        1. **Get Bing Maps API Key**:
+           - Go to [Bing Maps Dev Center](https://www.bingmapsportal.com/)
+           - Create free account and get API key
+           
+        2. **Configure AI Provider** (optional):
+           - OpenAI API key for GPT analysis
+           - Anthropic API key for Claude analysis
+           - Or use local analysis
+           
+        3. **Start Mapping**:
+           - Search for your city
+           - Start validating roof colors!
+        
+        ## 🐛 Troubleshooting
+        
+        **App won't start?**
+        - Run from terminal to see error messages
+        - Check you have graphics drivers installed
+        - For Wayland: try \`GDK_BACKEND=x11 ./SwipeMyRoof-x86_64.AppImage\`
+        
+        **Permission denied?**
+        - Run: \`chmod +x SwipeMyRoof-x86_64.AppImage\`
+        
+        **Missing libraries?**
+        - AppImage should be self-contained, but if issues persist:
+        - Install: \`sudo apt install libgtk-3-0 libx11-6\`
+        
+        ## 📊 Build Info
+        
+        - **Version**: $(date +%Y.%m.%d)
+        - **Commit**: ${{ github.sha }}
+        - **Built**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+        - **Size**: $(du -h SwipeMyRoof-x86_64.AppImage | cut -f1)
+        
+        ## 🤝 Contributing
+        
+        Found a bug? Have a feature request?
+        - **Issues**: [GitHub Issues](https://github.com/RyansOpenSauceRice/Swipe-My-Roof/issues)
+        - **Source**: [GitHub Repository](https://github.com/RyansOpenSauceRice/Swipe-My-Roof)
+        
+        Happy roof mapping! 🏠🗺️
+        EOF
+        
+    - name: Upload AppImage artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: SwipeMyRoof-AppImage
+        path: |
+          SwipeMyRoof-x86_64.AppImage
+          RELEASE_INFO.md
+        retention-days: 30
+        
+    - name: Create GitHub Release
+      if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.create_release == 'true')
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: appimage-v${{ github.run_number }}
+        release_name: Swipe My Roof v${{ github.run_number }} (AppImage)
+        body_path: RELEASE_INFO.md
+        draft: false
+        prerelease: false
+        
+    - name: Upload AppImage to Release
+      if: steps.create_release.outcome == 'success'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./SwipeMyRoof-x86_64.AppImage
+        asset_name: SwipeMyRoof-x86_64.AppImage
+        asset_content_type: application/octet-stream

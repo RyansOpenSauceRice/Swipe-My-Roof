@@ -1,0 +1,197 @@
+name: Build Test Artifacts
+
+on:
+  push:
+    branches: [ feature/* ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  build-test-linux:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+        
+    - name: Install Linux dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libfontconfig1-dev \
+          libfreetype6-dev \
+          libx11-dev \
+          libxrandr-dev \
+          libxi-dev \
+          libxcursor-dev \
+          libxinerama-dev \
+          libgl1-mesa-dev \
+          libglu1-mesa-dev \
+          libasound2-dev \
+          libpulse-dev \
+          libudev-dev \
+          libxss1 \
+          libgconf-2-4 \
+          libappindicator1 \
+          libnss3 \
+          libatk-bridge2.0-0 \
+          libdrm2 \
+          libgtk-3-0 \
+          libgbm1
+          
+    - name: Restore dependencies
+      run: dotnet restore src/SwipeMyRoof.AvaloniaUI/SwipeMyRoof.AvaloniaUI.csproj
+      
+    - name: Build application
+      run: |
+        dotnet build src/SwipeMyRoof.AvaloniaUI/SwipeMyRoof.AvaloniaUI.csproj \
+          --configuration Release \
+          --no-restore \
+          --verbosity normal
+          
+    - name: Run tests (if any)
+      run: |
+        if [ -d "tests" ]; then
+          dotnet test --configuration Release --no-build --verbosity normal
+        else
+          echo "No tests found - skipping test step"
+        fi
+        
+    - name: Publish self-contained Linux app
+      run: |
+        dotnet publish src/SwipeMyRoof.AvaloniaUI/SwipeMyRoof.AvaloniaUI.csproj \
+          --configuration Release \
+          --runtime linux-x64 \
+          --self-contained true \
+          --output ./publish/linux-x64 \
+          -p:PublishSingleFile=true \
+          -p:PublishTrimmed=true \
+          -p:TrimMode=partial \
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          
+    - name: Create test package
+      run: |
+        cd ./publish/linux-x64
+        chmod +x SwipeMyRoof.AvaloniaUI
+        
+        # Create launcher script
+        cat > SwipeMyRoof.sh << 'EOF'
+        #!/bin/bash
+        SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+        cd "$SCRIPT_DIR"
+        ./SwipeMyRoof.AvaloniaUI "$@"
+        EOF
+        chmod +x SwipeMyRoof.sh
+        
+        # Create test build README
+        cat > README-TEST-BUILD.txt << EOF
+        Swipe My Roof - TEST BUILD
+        ==========================
+        
+        ⚠️  THIS IS A TEST BUILD FROM BRANCH: ${{ github.ref_name }}
+        ⚠️  NOT FOR PRODUCTION USE
+        
+        Quick Test:
+        1. Extract this archive
+        2. Run: ./SwipeMyRoof.sh
+        3. Test the new features
+        
+        What's New in This Build:
+        - Branch: ${{ github.ref_name }}
+        - Commit: ${{ github.sha }}
+        - Built: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+        
+        Testing Checklist:
+        □ App starts without errors
+        □ Settings tab loads
+        □ Can enter Bing Maps API key
+        □ Can configure AI provider
+        □ Building validation view works
+        □ Satellite imagery loads (if API key provided)
+        □ Swipe gestures work (if implemented)
+        
+        Report Issues:
+        - GitHub Issues: https://github.com/RyansOpenSauceRice/Swipe-My-Roof/issues
+        - Include this build info in bug reports
+        
+        EOF
+        
+        # Create build metadata
+        echo "${{ github.sha }}" > VERSION
+        echo "${{ github.ref_name }}" > BRANCH
+        echo "$(date -u +"%Y-%m-%d %H:%M:%S UTC")" > BUILD_DATE
+        echo "TEST-BUILD" > BUILD_TYPE
+        
+    - name: Create test archive
+      run: |
+        cd ./publish
+        tar -czf SwipeMyRoof-TEST-${{ github.ref_name }}-linux-x64.tar.gz linux-x64/
+        
+    - name: Upload test build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: SwipeMyRoof-TEST-${{ github.ref_name }}-linux-x64
+        path: ./publish/SwipeMyRoof-TEST-${{ github.ref_name }}-linux-x64.tar.gz
+        retention-days: 7  # Shorter retention for test builds
+        
+    - name: Comment on PR with download link
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { owner, repo } = context.repo;
+          const { number } = context.issue;
+          
+          const comment = `🚀 **Test Build Ready!**
+          
+          A Linux test build has been created for this PR. You can download it from the [Actions tab](https://github.com/${owner}/${repo}/actions/runs/${{ github.run_id }}).
+          
+          **Quick Test:**
+          1. Download \`SwipeMyRoof-TEST-${{ github.ref_name }}-linux-x64.tar.gz\`
+          2. Extract and run \`./SwipeMyRoof.sh\`
+          3. Test the changes and report any issues
+          
+          **Build Info:**
+          - Commit: \`${{ github.sha }}\`
+          - Branch: \`${{ github.ref_name }}\`
+          - Built: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          
+          ⚠️ This is a test build - not for production use.`;
+          
+          github.rest.issues.createComment({
+            owner,
+            repo,
+            issue_number: number,
+            body: comment
+          });
+
+  # Build info summary
+  build-summary:
+    needs: build-test-linux
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Build Summary
+      run: |
+        echo "## 🏗️ Build Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Status:** ${{ needs.build-test-linux.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ "${{ needs.build-test-linux.result }}" == "success" ]; then
+          echo "✅ **Linux test build created successfully!**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📦 **Download:** Check the Artifacts section above" >> $GITHUB_STEP_SUMMARY
+          echo "🧪 **Testing:** Extract and run \`./SwipeMyRoof.sh\`" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ **Build failed - check logs above**" >> $GITHUB_STEP_SUMMARY
+        fi
