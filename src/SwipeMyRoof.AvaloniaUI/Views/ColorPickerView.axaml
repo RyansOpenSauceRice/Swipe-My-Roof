@@ -1,0 +1,224 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:SwipeMyRoof.AvaloniaUI.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="500"
+             x:Class="SwipeMyRoof.AvaloniaUI.Views.ColorPickerView"
+             x:DataType="vm:ColorPickerViewModel">
+
+    <UserControl.Styles>
+        <Style Selector="TextBlock.h2">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0 10 0 5"/>
+        </Style>
+        
+        <Style Selector="TextBlock.label">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0 5 0 2"/>
+        </Style>
+        
+        <Style Selector="Button">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Padding" Value="15 8"/>
+            <Setter Property="MinWidth" Value="100"/>
+        </Style>
+        
+        <Style Selector="Border.card">
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="Margin" Value="0 0 0 10"/>
+            <Setter Property="Background" Value="#F9F9F9"/>
+        </Style>
+        
+        <Style Selector="Border.color-preview">
+            <Setter Property="BorderBrush" Value="#666666"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="CornerRadius" Value="3"/>
+            <Setter Property="Width" Value="60"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Margin" Value="0 5 10 5"/>
+        </Style>
+        
+        <Style Selector="Image.clickable">
+            <Setter Property="Cursor" Value="Cross"/>
+        </Style>
+        
+        <Style Selector="Image.clickable:pointerover">
+            <Setter Property="Opacity" Value="0.9"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <!-- Header -->
+        <Border Grid.Row="0" Classes="card">
+            <StackPanel>
+                <TextBlock Classes="h2" Text="Manual Color Selection"/>
+                <TextBlock Text="{Binding Instructions}" FontStyle="Italic" Foreground="#666666"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- Main Content -->
+        <ScrollViewer Grid.Row="1" Margin="0 10 0 0">
+            <StackPanel>
+                <!-- Image with Eyedropper -->
+                <Border Classes="card">
+                    <StackPanel>
+                        <TextBlock Classes="h2" Text="Building Image"/>
+                        <TextBlock Text="Click on the roof to pick its color" Margin="0 0 0 10" FontSize="12" Foreground="#666666"/>
+                        
+                        <Border Background="White" BorderBrush="#CCCCCC" BorderThickness="1" 
+                                CornerRadius="3" Padding="5" Margin="0 10 0 0">
+                            <Panel>
+                                <!-- Image -->
+                                <Image Source="{Binding Image}" 
+                                       Stretch="Uniform" 
+                                       MaxHeight="300"
+                                       Classes.clickable="{Binding IsPickingColor}"
+                                       PointerPressed="OnImagePointerPressed"/>
+                                
+                                <!-- Crosshair overlay when picking -->
+                                <Canvas IsVisible="{Binding IsPickingColor}" 
+                                        Background="Transparent"
+                                        PointerPressed="OnImagePointerPressed">
+                                    <!-- This will show a crosshair cursor -->
+                                </Canvas>
+                            </Panel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Color Preview -->
+                <Border Classes="card" IsVisible="{Binding ShowColorPreview}">
+                    <StackPanel>
+                        <TextBlock Classes="h2" Text="Selected Color"/>
+                        
+                        <Grid ColumnDefinitions="Auto,*" Margin="0 10 0 0">
+                            <!-- Color Swatch -->
+                            <Border Grid.Column="0" Classes="color-preview" 
+                                    Background="{Binding SelectedColorBrush}"/>
+                            
+                            <!-- Color Details -->
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Classes="label" Text="Standard Color:"/>
+                                <TextBlock Text="{Binding SelectedStandardColor}" FontWeight="Bold" Margin="0 0 0 5"/>
+                                
+                                <TextBlock Classes="label" Text="RGB Hex:"/>
+                                <TextBlock Text="{Binding SelectedColorHex}" FontFamily="Consolas" Margin="0 0 0 5"/>
+                                
+                                <TextBlock Classes="label" Text="Mapping Confidence:"/>
+                                <TextBlock Text="{Binding MappingConfidenceText}" Margin="0 0 0 5"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Color Palette Reference -->
+                <Border Classes="card">
+                    <StackPanel>
+                        <TextBlock Classes="h2" Text="Standard Roof Colors"/>
+                        <TextBlock Text="Reference palette for roof color validation" 
+                                   FontSize="12" Foreground="#666666" Margin="0 0 0 10"/>
+                        
+                        <WrapPanel Margin="0 10 0 0">
+                            <!-- Black -->
+                            <StackPanel Margin="5">
+                                <Border Width="30" Height="20" Background="#1E1E1E" BorderBrush="#666" BorderThickness="1"/>
+                                <TextBlock Text="black" FontSize="10" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            
+                            <!-- Dark Gray -->
+                            <StackPanel Margin="5">
+                                <Border Width="30" Height="20" Background="#505050" BorderBrush="#666" BorderThickness="1"/>
+                                <TextBlock Text="dark gray" FontSize="10" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            
+                            <!-- Light Gray -->
+                            <StackPanel Margin="5">
+                                <Border Width="30" Height="20" Background="#B4B4B4" BorderBrush="#666" BorderThickness="1"/>
+                                <TextBlock Text="light gray" FontSize="10" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            
+                            <!-- Red -->
+                            <StackPanel Margin="5">
+                                <Border Width="30" Height="20" Background="#B43232" BorderBrush="#666" BorderThickness="1"/>
+                                <TextBlock Text="red" FontSize="10" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            
+                            <!-- Brown -->
+                            <StackPanel Margin="5">
+                                <Border Width="30" Height="20" Background="#785032" BorderBrush="#666" BorderThickness="1"/>
+                                <TextBlock Text="brown" FontSize="10" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            
+                            <!-- Tan -->
+                            <StackPanel Margin="5">
+                                <Border Width="30" Height="20" Background="#D2B48C" BorderBrush="#666" BorderThickness="1"/>
+                                <TextBlock Text="tan" FontSize="10" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            
+                            <!-- Green -->
+                            <StackPanel Margin="5">
+                                <Border Width="30" Height="20" Background="#50783C" BorderBrush="#666" BorderThickness="1"/>
+                                <TextBlock Text="green" FontSize="10" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            
+                            <!-- Blue -->
+                            <StackPanel Margin="5">
+                                <Border Width="30" Height="20" Background="#3C6496" BorderBrush="#666" BorderThickness="1"/>
+                                <TextBlock Text="blue" FontSize="10" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            
+                            <!-- White -->
+                            <StackPanel Margin="5">
+                                <Border Width="30" Height="20" Background="#F0F0F0" BorderBrush="#666" BorderThickness="1"/>
+                                <TextBlock Text="white" FontSize="10" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            
+                            <!-- Other -->
+                            <StackPanel Margin="5">
+                                <Border Width="30" Height="20" Background="#808080" BorderBrush="#666" BorderThickness="1"/>
+                                <TextBlock Text="other" FontSize="10" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+        
+        <!-- Action Buttons -->
+        <Border Grid.Row="2" Background="#F5F5F5" BorderBrush="#CCCCCC" BorderThickness="0 1 0 0" Padding="10" Margin="0 10 0 0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Command="{Binding StartPickingCommand}" 
+                        Background="#2196F3" 
+                        IsVisible="{Binding !IsPickingColor}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="🎯" Margin="0 0 5 0"/>
+                        <TextBlock Text="Pick Color"/>
+                    </StackPanel>
+                </Button>
+                
+                <Button Command="{Binding CancelCommand}" 
+                        Background="#757575"
+                        IsVisible="{Binding IsPickingColor}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="✕" Margin="0 0 5 0"/>
+                        <TextBlock Text="Cancel"/>
+                    </StackPanel>
+                </Button>
+                
+                <Button Command="{Binding ConfirmColorCommand}" 
+                        Background="#4CAF50"
+                        IsVisible="{Binding ShowColorPreview}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="✓" Margin="0 0 5 0"/>
+                        <TextBlock Text="Confirm Color"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

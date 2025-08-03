@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:SwipeMyRoof.AvaloniaUI.ViewModels"
+             xmlns:views="using:SwipeMyRoof.AvaloniaUI.Views"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
              x:Class="SwipeMyRoof.AvaloniaUI.Views.BuildingValidationView"
              x:DataType="vm:BuildingValidationViewModel">
@@ -200,7 +201,22 @@
                         <TextBlock Text="Accept"/>
                     </StackPanel>
                 </Button>
+                
+                <Button Command="{Binding ShowColorPickerCommand}" Background="#FF9800"
+                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="🎯" FontWeight="Bold" Margin="0 0 5 0"/>
+                        <TextBlock Text="Pick Color"/>
+                    </StackPanel>
+                </Button>
             </StackPanel>
+        </Border>
+        
+        <!-- Color Picker Overlay -->
+        <Border Grid.RowSpan="3" Background="#80000000" IsVisible="{Binding ShowColorPicker}" ZIndex="100">
+            <Border Background="White" CornerRadius="10" Margin="20" MaxWidth="800" MaxHeight="600">
+                <views:ColorPickerView DataContext="{Binding ColorPickerViewModel}"/>
+            </Border>
         </Border>
     </Grid>
 </UserControl>

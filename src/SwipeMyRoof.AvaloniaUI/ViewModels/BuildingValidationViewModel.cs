@@ -9,6 +9,7 @@ using Avalonia.Platform;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SwipeMyRoof.Core.Models;
+using SwipeMyRoof.Core.Services;
 using SwipeMyRoof.UI.Controls;
 
 namespace SwipeMyRoof.AvaloniaUI.ViewModels;
@@ -85,6 +86,23 @@ public partial class BuildingValidationViewModel : ViewModelBase
     private string _proposedColorExplanation = string.Empty;
     
     /// <summary>
+    /// Whether the color picker is visible
+    /// </summary>
+    [ObservableProperty]
+    private bool _showColorPicker = false;
+    
+    /// <summary>
+    /// Color picker view model
+    /// </summary>
+    [ObservableProperty]
+    private ColorPickerViewModel? _colorPickerViewModel;
+    
+    /// <summary>
+    /// Current building image data for color picking
+    /// </summary>
+    private byte[]? _currentImageData;
+    
+    /// <summary>
     /// Constructor
     /// </summary>
     public BuildingValidationViewModel()
@@ -107,6 +125,12 @@ public partial class BuildingValidationViewModel : ViewModelBase
         // Set sample values
         ProposedColorValue = "Red";
         ProposedColorExplanation = "The building appears to have a red roof based on the satellite imagery.";
+        
+        // Initialize color picker
+        var colorPickerService = new ColorPickerService();
+        ColorPickerViewModel = new ColorPickerViewModel(colorPickerService);
+        ColorPickerViewModel.ColorConfirmed += OnColorConfirmed;
+        ColorPickerViewModel.ColorPickingCancelled += OnColorPickingCancelled;
     }
     
     /// <summary>
@@ -135,18 +159,30 @@ public partial class BuildingValidationViewModel : ViewModelBase
     }
     
     /// <summary>
-    /// Reject the current building
+    /// Reject the current building and open color picker
     /// </summary>
     [RelayCommand]
     private async Task RejectBuilding()
     {
-        // TODO: Implement building rejection logic
-        
-        // For now, just show a message
-        Console.WriteLine($"Building {CurrentBuilding.OsmId} rejected");
-        
-        // Load the next building
-        await LoadNextBuilding();
+        // Show the color picker for manual color selection
+        await ShowColorPicker();
+    }
+    
+    /// <summary>
+    /// Show the color picker for manual color selection
+    /// </summary>
+    [RelayCommand]
+    private async Task ShowColorPicker()
+    {
+        if (BuildingImage != null && _currentImageData != null && ColorPickerViewModel != null)
+        {
+            ColorPickerViewModel.SetImage(_currentImageData, BuildingImage);
+            ShowColorPicker = true;
+        }
+        else
+        {
+            Console.WriteLine("Cannot show color picker: image data not available");
+        }
     }
     
     /// <summary>
@@ -235,6 +271,10 @@ public partial class BuildingValidationViewModel : ViewModelBase
             await stream.CopyToAsync(memoryStream);
             memoryStream.Position = 0;
             
+            // Store the image data for color picking
+            _currentImageData = memoryStream.ToArray();
+            memoryStream.Position = 0;
+            
             // Create a bitmap from the stream on the UI thread
             BuildingImage = new Bitmap(memoryStream);
         }
@@ -302,5 +342,50 @@ public partial class BuildingValidationViewModel : ViewModelBase
         };
         
         return explanations[new Random().Next(0, explanations.Length)];
+    }
+    
+    /// <summary>
+    /// Handle color confirmed from color picker
+    /// </summary>
+    /// <param name="sender">Sender</param>
+    /// <param name="e">Event args</param>
+    private void OnColorConfirmed(object? sender, ColorConfirmedEventArgs e)
+    {
+        // Update the building with the manually selected color
+        if (CurrentBuilding.ProposedColor != null)
+        {
+            CurrentBuilding.ProposedColor.Value = e.StandardColor;
+            CurrentBuilding.ProposedColor.Source = "manual";
+            CurrentBuilding.ProposedColor.Confidence = e.PickedColor.MappingConfidence;
+            CurrentBuilding.ProposedColor.Explanation = $"Manually selected from satellite imagery at pixel ({e.PickedColor.PixelX}, {e.PickedColor.PixelY})";
+        }
+        
+        // Update UI
+        ProposedColorValue = e.StandardColor;
+        ProposedColorExplanation = $"Manually selected: {e.StandardColor} (RGB: {e.PickedColor.Rgb.ToHex()})";
+        
+        // Update confidence indicator
+        ConfidenceIndicator = new ConfidenceIndicator(e.PickedColor.MappingConfidence);
+        
+        // Hide color picker
+        ShowColorPicker = false;
+        
+        Console.WriteLine($"Color manually selected: {e.StandardColor} for building {CurrentBuilding.OsmId}");
+    }
+    
+    /// <summary>
+    /// Handle color picking cancelled
+    /// </summary>
+    /// <param name="sender">Sender</param>
+    /// <param name="e">Event args</param>
+    private void OnColorPickingCancelled(object? sender, EventArgs e)
+    {
+        // Hide color picker and load next building
+        ShowColorPicker = false;
+        
+        // Load the next building since user rejected and didn't pick a color
+        _ = LoadNextBuilding();
+        
+        Console.WriteLine($"Color picking cancelled for building {CurrentBuilding.OsmId}");
     }
 }
