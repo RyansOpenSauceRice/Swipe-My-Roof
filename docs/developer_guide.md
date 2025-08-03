@@ -53,6 +53,14 @@ The project is organized into the following modules:
 dotnet build
 ```
 
+### Building for Linux (Fast Testing)
+
+```bash
+dotnet build src/SwipeMyRoof.AvaloniaUI.Linux/SwipeMyRoof.AvaloniaUI.Linux.csproj
+```
+
+This Linux-specific build is optimized for faster testing and development cycles.
+
 ### Building for Android
 
 ```bash
@@ -75,6 +83,14 @@ The APK will be located in `src/SwipeMyRoof.AvaloniaUI.Android/bin/Release/net8.
 dotnet run --project src/SwipeMyRoof.AvaloniaUI/SwipeMyRoof.AvaloniaUI.csproj
 ```
 
+### Running the Linux Application (Fast Testing)
+
+```bash
+dotnet run --project src/SwipeMyRoof.AvaloniaUI.Linux/SwipeMyRoof.AvaloniaUI.Linux.csproj
+```
+
+The Linux build includes additional debugging features and is optimized for faster development cycles.
+
 ### Running on an Android Emulator
 
 ```bash
@@ -94,6 +110,19 @@ dotnet build src/SwipeMyRoof.AvaloniaUI.Android/SwipeMyRoof.AvaloniaUI.Android.c
 ```bash
 dotnet test src/SwipeMyRoof.Tests/SwipeMyRoof.Tests.csproj
 ```
+
+### Fast Testing with Linux
+
+For rapid development cycles, use the provided testing script:
+
+```bash
+./scripts/test_linux.sh
+```
+
+This script:
+1. Builds the Linux version of the app
+2. Runs all unit tests
+3. Offers to launch the app if tests pass
 
 ### Running UI Tests
 
