@@ -314,10 +314,18 @@ When image quality is poor or colors are ambiguous:
 ## Technical Implementation Notes
 
 ### Platform & Language
-- C# (.NET MAUI or similar cross-platform framework)
-- Target Android primarily, with architecture allowing future iOS support
+- C# with Avalonia UI for cross-platform support
+- Target Android primarily, with architecture allowing future desktop support
 - No Google dependencies (FDroid/GrapheneOS compatible)
 - Reproducible builds for FDroid inclusion
+
+### Documentation Structure
+- README.md: User-focused overview for OSM editors (non-technical)
+- docs/spec.md: Technical specification for developers
+- docs/user_guide.md: Detailed user guide for OSM editors
+- docs/prompts.md: LLM prompt design and response formats
+- docs/fdroid_manifest.md: F-Droid compatibility guidelines
+- docs/android_testing_plan.md: Testing strategy for Android platform
 
 ### Authentication & Security
 - OSM OAuth 1.0a flow for user authentication

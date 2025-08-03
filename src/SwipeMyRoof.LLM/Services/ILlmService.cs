@@ -3,12 +3,12 @@ using SwipeMyRoof.LLM.Models;
 namespace SwipeMyRoof.LLM.Services;
 
 /// <summary>
-/// Interface for LLM service operations
+/// Interface for AI service operations
 /// </summary>
 public interface ILlmService
 {
     /// <summary>
-    /// Get a roof color suggestion from the LLM
+    /// Get a roof color suggestion from the AI
     /// </summary>
     /// <param name="request">The roof color request</param>
     /// <param name="cancellationToken">Cancellation token</param>

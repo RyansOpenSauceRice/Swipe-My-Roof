@@ -13,6 +13,16 @@ public class ConfidenceIndicator
     public ConfidenceLevel ConfidenceLevel { get; set; }
     
     /// <summary>
+    /// The confidence percentage (0-100)
+    /// </summary>
+    public double ConfidencePercentage => ConfidenceLevel.ToConfidenceValue() * 100;
+    
+    /// <summary>
+    /// The description of the confidence level
+    /// </summary>
+    public string Description => ConfidenceLevel.GetDescription();
+    
+    /// <summary>
     /// Whether to show the description text
     /// </summary>
     public bool ShowDescription { get; set; } = true;
