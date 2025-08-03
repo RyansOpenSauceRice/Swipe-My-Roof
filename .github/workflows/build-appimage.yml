@@ -2,14 +2,10 @@ name: Build AppImage
 
 on:
   push:
+    branches: [ main, feature/* ]
+  pull_request:
     branches: [ main ]
   workflow_dispatch:  # Allow manual triggering
-    inputs:
-      create_release:
-        description: 'Create a GitHub release'
-        required: false
-        default: true
-        type: boolean
 
 jobs:
   build-appimage:
@@ -129,101 +125,104 @@ jobs:
         file SwipeMyRoof-x86_64.AppImage
         ls -la SwipeMyRoof-x86_64.AppImage
         
-    - name: Create release info
+    - name: Create build info
       run: |
-        cat > RELEASE_INFO.md << EOF
-        # Swipe My Roof - Linux AppImage
+        # Determine build type based on branch
+        if [ "${{ github.ref_name }}" = "main" ]; then
+          BUILD_TYPE="DEVELOPMENT"
+          BUILD_DESC="Latest development build from main branch"
+        else
+          BUILD_TYPE="FEATURE-TEST"
+          BUILD_DESC="Feature test build from ${{ github.ref_name }} branch"
+        fi
+        
+        cat > BUILD_INFO.md << EOF
+        # Swipe My Roof - Linux AppImage ($BUILD_TYPE)
         
         ## 🚀 One-Click Download & Run
         
-        **Super Easy Installation:**
+        **Super Easy Testing:**
         1. Download \`SwipeMyRoof-x86_64.AppImage\`
         2. Make executable: \`chmod +x SwipeMyRoof-x86_64.AppImage\`
         3. Double-click or run: \`./SwipeMyRoof-x86_64.AppImage\`
         
-        **No installation required!** Everything is bundled in a single file.
+        **⚠️ This is a $BUILD_TYPE build - expect bugs and missing features!**
         
-        ## ✨ What's Included
+        ## 🧪 What's Currently Working
         
-        - ✅ **Bing Maps Integration**: Satellite imagery for roof analysis
-        - ✅ **OSM Submission**: Direct OpenStreetMap integration
-        - ✅ **AI-Powered Analysis**: Roof color validation
-        - ✅ **Clean UI**: Avalonia-based desktop interface
-        - ✅ **Self-Contained**: No dependencies to install
+        - ✅ **Basic UI**: Avalonia desktop interface
+        - ✅ **Settings Tab**: Configuration interface
+        - ✅ **Bing Maps Integration**: Satellite imagery (needs API key)
+        - ✅ **Building Validation View**: Core UI structure
+        - ⚠️ **OSM Submission**: Implemented but needs testing
+        - ⚠️ **AI Analysis**: Needs API key configuration
+        - ❌ **Location Search**: Not yet implemented
+        - ❌ **Swipe Gestures**: Partially implemented
         
-        ## 🖥️ System Requirements
+        ## 🔧 Testing Setup
         
-        - **OS**: Linux x64 (Ubuntu 18.04+, Fedora 30+, or equivalent)
-        - **Graphics**: Any modern graphics driver
-        - **Memory**: 512MB RAM minimum
-        - **Storage**: ~100MB for the AppImage
-        
-        ## 🔧 First Run Setup
-        
-        1. **Get Bing Maps API Key**:
+        1. **Get Bing Maps API Key** (Required for satellite imagery):
            - Go to [Bing Maps Dev Center](https://www.bingmapsportal.com/)
            - Create free account and get API key
+           - Enter in Settings tab
            
-        2. **Configure AI Provider** (optional):
+        2. **Optional AI Provider**:
            - OpenAI API key for GPT analysis
            - Anthropic API key for Claude analysis
-           - Or use local analysis
            
-        3. **Start Mapping**:
-           - Search for your city
-           - Start validating roof colors!
-        
-        ## 🐛 Troubleshooting
-        
-        **App won't start?**
-        - Run from terminal to see error messages
-        - Check you have graphics drivers installed
-        - For Wayland: try \`GDK_BACKEND=x11 ./SwipeMyRoof-x86_64.AppImage\`
-        
-        **Permission denied?**
-        - Run: \`chmod +x SwipeMyRoof-x86_64.AppImage\`
-        
-        **Missing libraries?**
-        - AppImage should be self-contained, but if issues persist:
-        - Install: \`sudo apt install libgtk-3-0 libx11-6\`
+        3. **Test What Works**:
+           - Settings configuration
+           - Basic UI navigation
+           - Satellite imagery (with API key)
         
         ## 📊 Build Info
         
-        - **Version**: $(date +%Y.%m.%d)
+        - **Type**: $BUILD_TYPE
+        - **Branch**: ${{ github.ref_name }}
         - **Commit**: ${{ github.sha }}
         - **Built**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
-        - **Size**: $(du -h SwipeMyRoof-x86_64.AppImage | cut -f1)
+        - **Description**: $BUILD_DESC
         
-        ## 🤝 Contributing
+        ## 🐛 Expected Issues & Testing
         
-        Found a bug? Have a feature request?
-        - **Issues**: [GitHub Issues](https://github.com/RyansOpenSauceRice/Swipe-My-Roof/issues)
-        - **Source**: [GitHub Repository](https://github.com/RyansOpenSauceRice/Swipe-My-Roof)
+        **Known Limitations:**
+        - Location search not implemented
+        - Swipe gestures incomplete
+        - Error handling needs improvement
+        - UI polish needed
         
-        Happy roof mapping! 🏠🗺️
+        **Please Test & Report:**
+        - App startup and basic navigation
+        - Settings tab functionality
+        - Satellite imagery loading (with API key)
+        - Any crashes or errors
+        
+        **Report Issues**: [GitHub Issues](https://github.com/RyansOpenSauceRice/Swipe-My-Roof/issues)
+        
+        Thanks for testing! 🚀
         EOF
         
     - name: Upload AppImage artifact
       uses: actions/upload-artifact@v4
       with:
-        name: SwipeMyRoof-AppImage
+        name: SwipeMyRoof-AppImage-${{ github.ref_name }}
         path: |
           SwipeMyRoof-x86_64.AppImage
-          RELEASE_INFO.md
+          BUILD_INFO.md
         retention-days: 30
         
-    - name: Create GitHub Release
-      if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.create_release == 'true')
+    - name: Create GitHub Release (Development Builds)
+      if: github.event_name == 'push'
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: appimage-v${{ github.run_number }}
-        release_name: Swipe My Roof v${{ github.run_number }} (AppImage)
-        body_path: RELEASE_INFO.md
+        tag_name: dev-build-${{ github.run_number }}-${{ github.ref_name }}
+        release_name: Development Build ${{ github.run_number }} (${{ github.ref_name }})
+        body_path: BUILD_INFO.md
         draft: false
-        prerelease: false
+        prerelease: true  # Mark as pre-release since these are development builds
         
     - name: Upload AppImage to Release
       if: steps.create_release.outcome == 'success'
@@ -235,3 +234,40 @@ jobs:
         asset_path: ./SwipeMyRoof-x86_64.AppImage
         asset_name: SwipeMyRoof-x86_64.AppImage
         asset_content_type: application/octet-stream
+        
+    - name: Comment on PR with AppImage download
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { owner, repo } = context.repo;
+          const { number } = context.issue;
+          
+          const comment = `🚀 **AppImage Test Build Ready!**
+          
+          A Linux AppImage has been created for this PR. You can download it from the [Actions tab](https://github.com/${owner}/${repo}/actions/runs/${{ github.run_id }}).
+          
+          **One-Click Testing:**
+          1. Download \`SwipeMyRoof-x86_64.AppImage\` from artifacts
+          2. Make executable: \`chmod +x SwipeMyRoof-x86_64.AppImage\`
+          3. Run: \`./SwipeMyRoof-x86_64.AppImage\`
+          
+          **What to Test:**
+          - App startup and basic navigation
+          - Settings tab functionality  
+          - Satellite imagery (needs Bing Maps API key)
+          - Any crashes or UI issues
+          
+          **Build Info:**
+          - Branch: \`${{ github.ref_name }}\`
+          - Commit: \`${{ github.sha }}\`
+          - Type: Feature test build
+          
+          ⚠️ This is a development build - expect bugs and missing features!`;
+          
+          github.rest.issues.createComment({
+            owner,
+            repo,
+            issue_number: number,
+            body: comment
+          });

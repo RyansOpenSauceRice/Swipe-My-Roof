@@ -1,41 +1,27 @@
 # CI/CD Pipeline Documentation
 
-## 🚀 Automated Linux Desktop Builds
+## 🚀 Simplified AppImage-Only Builds
 
-This repository has three CI/CD workflows for creating downloadable Linux desktop applications:
+This repository uses a single, streamlined CI/CD workflow for creating downloadable Linux desktop applications:
 
-### 1. **Test Builds** (`build-test-artifacts.yml`)
-**Triggers:** Feature branches, Pull Requests
-**Purpose:** Quick testing of new features
+### **AppImage Builds** (`build-appimage.yml`)
+**Triggers:** All branches (main, feature/*), Pull Requests, Manual trigger
+**Purpose:** Universal one-click portable applications
 
-- ✅ Builds on every feature branch push
-- ✅ Creates test artifacts for download
-- ✅ Comments on PRs with download links
-- ✅ 7-day retention for test builds
-
-**Download:** Go to Actions tab → Select workflow run → Download artifacts
-
-### 2. **Release Builds** (`build-linux-desktop.yml`)
-**Triggers:** Main branch pushes
-**Purpose:** Stable releases with GitHub releases
-
-- ✅ Self-contained Linux x64 executable
-- ✅ Automatic GitHub release creation
-- ✅ Both `.tar.gz` and `.zip` formats
-- ✅ 30-day retention
-
-**Download:** Go to Releases tab → Download latest release
-
-### 3. **AppImage Builds** (`build-appimage.yml`)
-**Triggers:** Main branch pushes, Manual trigger
-**Purpose:** Single-file portable application
-
+**For All Builds:**
 - ✅ One-click download and run
-- ✅ No installation required
+- ✅ No installation required  
 - ✅ Universal Linux compatibility
-- ✅ Automatic GitHub release
+- ✅ Self-contained with all dependencies
 
-**Download:** Go to Releases tab → Download `.AppImage` file
+**Build Types:**
+- **Main Branch**: Development builds (pre-release)
+- **Feature Branches**: Feature test builds (pre-release)
+- **Pull Requests**: Test artifacts only
+
+**Download:** 
+- **Releases Tab**: For pushed builds (main/feature branches)
+- **Actions Tab**: For PR builds (artifacts)
 
 ## 📦 What Gets Built
 
@@ -55,17 +41,16 @@ This repository has three CI/CD workflows for creating downloadable Linux deskto
 
 ## 🎯 One-Click Download Workflow
 
-### For Testers (Feature Branches):
-1. Go to **Actions** tab
-2. Click on latest workflow run
-3. Download `SwipeMyRoof-TEST-[branch]-linux-x64.tar.gz`
-4. Extract and run `./SwipeMyRoof.sh`
-
-### For Users (Stable Releases):
+### For All Testing (Simplified):
 1. Go to **Releases** tab
-2. Download `SwipeMyRoof-x86_64.AppImage`
+2. Download latest `SwipeMyRoof-x86_64.AppImage`
 3. Make executable: `chmod +x SwipeMyRoof-x86_64.AppImage`
 4. Double-click or run: `./SwipeMyRoof-x86_64.AppImage`
+
+### For PR Testing:
+1. Go to **Actions** tab → Select PR workflow run
+2. Download `SwipeMyRoof-x86_64.AppImage` from artifacts
+3. Same steps as above
 
 ## 🔧 Manual Triggering
 
@@ -73,12 +58,7 @@ This repository has three CI/CD workflows for creating downloadable Linux deskto
 1. Go to **Actions** tab
 2. Select "Build AppImage" workflow
 3. Click "Run workflow"
-4. Choose whether to create a release
-
-### Trigger Test Build:
-1. Go to **Actions** tab
-2. Select "Build Test Artifacts" workflow
-3. Click "Run workflow"
+4. Select branch to build from
 
 ## 📊 Build Information
 
@@ -89,9 +69,8 @@ This repository has three CI/CD workflows for creating downloadable Linux deskto
 - ✅ **Build Type**: TEST vs RELEASE
 
 ### File Sizes (Approximate):
-- **Tar.gz**: ~40-60MB (compressed)
-- **AppImage**: ~80-120MB (self-contained)
-- **Extracted**: ~150-200MB (with all dependencies)
+- **AppImage**: ~80-120MB (self-contained, portable)
+- **Extracted**: ~150-200MB (when AppImage mounts)
 
 ## 🐛 Troubleshooting Builds
 
@@ -122,17 +101,25 @@ This repository has three CI/CD workflows for creating downloadable Linux deskto
 - [ ] Swipe gestures function
 - [ ] OSM submission works
 
-## 🚀 Deployment Strategy
+## 🚀 Simplified Deployment Strategy
 
 ### Development Flow:
-1. **Feature Branch** → Test build artifact
-2. **Pull Request** → Test build + PR comment
-3. **Merge to Main** → Release build + AppImage
-4. **Manual Trigger** → On-demand builds
+1. **Feature Branch Push** → AppImage pre-release
+2. **Pull Request** → AppImage artifact + PR comment
+3. **Main Branch Push** → AppImage pre-release (development)
+4. **Manual Trigger** → On-demand AppImage builds
 
-### Release Types:
-- **Pre-release**: Feature branch builds
-- **Release**: Main branch builds
-- **Latest**: Most recent stable AppImage
+### All Builds Are Pre-releases:
+Since the app is in active development, all builds are marked as pre-releases to set proper expectations:
+- **Main Branch**: Development builds (latest features)
+- **Feature Branches**: Feature test builds (experimental)
+- **Pull Requests**: Test artifacts (review builds)
 
-This setup provides instant feedback for developers and easy downloads for testers and users!
+### Benefits:
+- ✅ **Single Format**: Only AppImage (universal compatibility)
+- ✅ **One-Click Testing**: Download and run immediately
+- ✅ **No Confusion**: All builds clearly marked as development
+- ✅ **Easy Distribution**: Share single AppImage file
+- ✅ **Instant Feedback**: Every push creates testable build
+
+This simplified approach makes it super easy for anyone to test the latest features!
