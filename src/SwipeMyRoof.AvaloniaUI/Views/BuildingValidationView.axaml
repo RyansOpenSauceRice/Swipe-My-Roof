@@ -65,63 +65,142 @@
             <TextBlock Text="{Binding GetPracticeModeBanner}" HorizontalAlignment="Center" FontWeight="Bold"/>
         </Border>
         
-        <Grid Grid.Row="1" ColumnDefinitions="*,*" Margin="20">
-            <!-- Left Column - Building Image -->
-            <Border Grid.Column="0" Classes="card" Margin="0 0 10 0">
-                <Grid RowDefinitions="Auto,*">
-                    <TextBlock Grid.Row="0" Classes="h2" Text="Building Image"/>
-                    <Border Grid.Row="1" Background="LightGray" Margin="0 10 0 0">
-                        <TextBlock Text="Building Image Placeholder" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        <!-- This would be replaced with an actual image control in a real implementation -->
+        <!-- Main Content with Responsive Layout -->
+        <ScrollViewer Grid.Row="1" Margin="10" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+            <!-- Use a panel that adapts to screen size -->
+            <Panel>
+                <!-- Desktop Layout (two columns) -->
+                <Grid ColumnDefinitions="*,*" Margin="5" IsVisible="{Binding !IsNarrowView}">
+                    <!-- Left Column - Building Image -->
+                    <Border Grid.Column="0" Classes="card" Margin="0 0 10 0">
+                        <Grid RowDefinitions="Auto,*">
+                            <TextBlock Grid.Row="0" Classes="h2" Text="Building Image"/>
+                            <Border Grid.Row="1" Background="LightGray" Margin="0 10 0 0" MinHeight="300">
+                                <Panel>
+                                    <!-- Placeholder when no image is loaded -->
+                                    <TextBlock Text="Loading image..." VerticalAlignment="Center" HorizontalAlignment="Center" 
+                                               IsVisible="{Binding IsLoadingImage}"/>
+                                    
+                                    <!-- Actual image -->
+                                    <Image Source="{Binding BuildingImage}" Stretch="Uniform" 
+                                           IsVisible="{Binding !IsLoadingImage}"/>
+                                </Panel>
+                            </Border>
+                        </Grid>
                     </Border>
+                    
+                    <!-- Right Column - Building Information -->
+                    <StackPanel Grid.Column="1" Margin="10 0 0 0">
+                        <!-- Building Information -->
+                        <Border Classes="card">
+                            <StackPanel>
+                                <TextBlock Classes="h2" Text="Building Information"/>
+                                <TextBlock Classes="label" Text="Building ID"/>
+                                <TextBlock Text="{Binding CurrentBuilding.OsmId}" Margin="0 0 0 10"/>
+                                
+                                <TextBlock Classes="label" Text="Proposed Color"/>
+                                <TextBlock Text="{Binding ProposedColorValue}" Margin="0 0 0 10"/>
+                                
+                                <TextBlock Classes="label" Text="Explanation"/>
+                                <TextBlock Text="{Binding ProposedColorExplanation}" TextWrapping="Wrap" Margin="0 0 0 10"/>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Confidence Indicator -->
+                        <Border Classes="card" IsVisible="{Binding ShowConfidenceIndicator}">
+                            <StackPanel>
+                                <TextBlock Classes="h2" Text="AI Confidence"/>
+                                <ProgressBar Value="{Binding ConfidenceIndicator.ConfidencePercentage}" 
+                                             Minimum="0" Maximum="100" Height="20" Margin="0 5 0 5"/>
+                                <TextBlock Text="{Binding ConfidenceIndicator.Description}" Margin="0 5 0 0"/>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Warning Message -->
+                        <Border Classes="warning" IsVisible="{Binding HasWarning}">
+                            <TextBlock Text="{Binding GetWarningMessage}" TextWrapping="Wrap"/>
+                        </Border>
+                    </StackPanel>
                 </Grid>
-            </Border>
-            
-            <!-- Right Column - Building Information -->
-            <StackPanel Grid.Column="1" Margin="10 0 0 0">
-                <!-- Building Information -->
-                <Border Classes="card">
-                    <StackPanel>
-                        <TextBlock Classes="h2" Text="Building Information"/>
-                        <TextBlock Classes="label" Text="Building ID"/>
-                        <TextBlock Text="{Binding CurrentBuilding.OsmId}" Margin="0 0 0 10"/>
-                        
-                        <TextBlock Classes="label" Text="Proposed Color"/>
-                        <TextBlock Text="{Binding ProposedColorValue}" Margin="0 0 0 10"/>
-                        
-                        <TextBlock Classes="label" Text="Explanation"/>
-                        <TextBlock Text="{Binding ProposedColorExplanation}" TextWrapping="Wrap" Margin="0 0 0 10"/>
-                    </StackPanel>
-                </Border>
                 
-                <!-- Confidence Indicator -->
-                <Border Classes="card" IsVisible="{Binding ShowConfidenceIndicator}">
-                    <StackPanel>
-                        <TextBlock Classes="h2" Text="AI Confidence"/>
-                        <ProgressBar Value="{Binding ConfidenceIndicator.ConfidencePercentage}" 
-                                     Minimum="0" Maximum="100" Height="20" Margin="0 5 0 5"/>
-                        <TextBlock Text="{Binding ConfidenceIndicator.Description}" Margin="0 5 0 0"/>
-                    </StackPanel>
-                </Border>
-                
-                <!-- Warning Message -->
-                <Border Classes="warning" IsVisible="{Binding HasWarning}">
-                    <TextBlock Text="{Binding GetWarningMessage}" TextWrapping="Wrap"/>
-                </Border>
-            </StackPanel>
-        </Grid>
+                <!-- Mobile Layout (single column) -->
+                <StackPanel Margin="5" IsVisible="{Binding IsNarrowView}">
+                    <!-- Building Image -->
+                    <Border Classes="card">
+                        <Grid RowDefinitions="Auto,*">
+                            <TextBlock Grid.Row="0" Classes="h2" Text="Building Image"/>
+                            <Border Grid.Row="1" Background="LightGray" Margin="0 10 0 0" MinHeight="200">
+                                <Panel>
+                                    <!-- Placeholder when no image is loaded -->
+                                    <TextBlock Text="Loading image..." VerticalAlignment="Center" HorizontalAlignment="Center" 
+                                               IsVisible="{Binding IsLoadingImage}"/>
+                                    
+                                    <!-- Actual image -->
+                                    <Image Source="{Binding BuildingImage}" Stretch="Uniform" 
+                                           IsVisible="{Binding !IsLoadingImage}"/>
+                                </Panel>
+                            </Border>
+                        </Grid>
+                    </Border>
+                    
+                    <!-- Building Information -->
+                    <Border Classes="card">
+                        <StackPanel>
+                            <TextBlock Classes="h2" Text="Building Information"/>
+                            <TextBlock Classes="label" Text="Building ID"/>
+                            <TextBlock Text="{Binding CurrentBuilding.OsmId}" Margin="0 0 0 10"/>
+                            
+                            <TextBlock Classes="label" Text="Proposed Color"/>
+                            <TextBlock Text="{Binding ProposedColorValue}" Margin="0 0 0 10"/>
+                            
+                            <TextBlock Classes="label" Text="Explanation"/>
+                            <TextBlock Text="{Binding ProposedColorExplanation}" TextWrapping="Wrap" Margin="0 0 0 10"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Confidence Indicator -->
+                    <Border Classes="card" IsVisible="{Binding ShowConfidenceIndicator}">
+                        <StackPanel>
+                            <TextBlock Classes="h2" Text="AI Confidence"/>
+                            <ProgressBar Value="{Binding ConfidenceIndicator.ConfidencePercentage}" 
+                                         Minimum="0" Maximum="100" Height="20" Margin="0 5 0 5"/>
+                            <TextBlock Text="{Binding ConfidenceIndicator.Description}" Margin="0 5 0 0"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Warning Message -->
+                    <Border Classes="warning" IsVisible="{Binding HasWarning}">
+                        <TextBlock Text="{Binding GetWarningMessage}" TextWrapping="Wrap"/>
+                    </Border>
+                </StackPanel>
+            </Panel>
+        </ScrollViewer>
         
-        <!-- Action Buttons -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 0 0 20">
-            <Button Command="{Binding RejectBuildingCommand}" Background="#FF5252">
-                Reject
-            </Button>
-            <Button Command="{Binding SkipBuildingCommand}" Background="#757575">
-                Skip
-            </Button>
-            <Button Command="{Binding AcceptBuildingCommand}" Background="#4CAF50">
-                Accept
-            </Button>
-        </StackPanel>
+        <!-- Action Buttons - Fixed at bottom for easy access on mobile -->
+        <Border Grid.Row="2" Background="#F5F5F5" BorderBrush="#CCCCCC" BorderThickness="0 1 0 0" Padding="10">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Command="{Binding RejectBuildingCommand}" Background="#FF5252" 
+                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="✕" FontWeight="Bold" Margin="0 0 5 0"/>
+                        <TextBlock Text="Reject"/>
+                    </StackPanel>
+                </Button>
+                <Button Command="{Binding SkipBuildingCommand}" Background="#757575"
+                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="⟳" FontWeight="Bold" Margin="0 0 5 0"/>
+                        <TextBlock Text="Skip"/>
+                    </StackPanel>
+                </Button>
+                <Button Command="{Binding AcceptBuildingCommand}" Background="#4CAF50"
+                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="✓" FontWeight="Bold" Margin="0 0 5 0"/>
+                        <TextBlock Text="Accept"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Border>
     </Grid>
 </UserControl>
